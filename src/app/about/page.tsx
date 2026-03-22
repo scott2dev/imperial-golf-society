@@ -19,7 +19,7 @@ export default function AboutPage() {
           </h1>
           <div className="mt-6 overflow-hidden rounded-[1.5rem]">
             <Image
-              src="/imperialbarold.jfif"
+              src="/imperialbarold.jpg"
               alt="Imperial Bar in Bangor"
               width={1600}
               height={900}
