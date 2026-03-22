@@ -49,7 +49,7 @@ const fixtures = [
     date: "July 26",
     course: "Cairndhu",
     teeTime: "10.30am",
-    imageSrc: "/cairndhu.jfif",
+    imageSrc: "/cairndhu.jpg",
     imageAlt: "Cairndhu Golf Club",
     mapsUrl: "https://www.google.com/maps/search/?api=1&query=Cairndhu+Golf+Club",
     sponsorName: "Sponsor TBC",
