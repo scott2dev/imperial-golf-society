@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import FixtureImageLink from "@/components/FixtureImageLink";
 
 export const metadata: Metadata = {
   title: "Fixtures",
@@ -12,6 +12,7 @@ const fixtures = [
     title: "First Outing",
     date: "April 19",
     course: "Kirkistown",
+    courseWebsiteUrl: "https://kcgc.golf/",
     teeTime: "11.00am",
     imageSrc: "/kirkistown.jpg",
     imageAlt: "Kirkistown Castle Golf Club",
@@ -24,6 +25,7 @@ const fixtures = [
     title: "Monthly Outing",
     date: "May 31",
     course: "Lurgan",
+    courseWebsiteUrl: "https://www.lurgangolfclub.com/",
     teeTime: "12.30pm",
     imageSrc: "/lurgan.webp",
     imageAlt: "Lurgan Golf Club",
@@ -36,6 +38,7 @@ const fixtures = [
     title: "Monthly Outing",
     date: "June 28",
     course: "Clandeboye",
+    courseWebsiteUrl: "https://www.cgc-ni.com/",
     teeTime: "10.58am",
     imageSrc: "/Clandeboye.jpg",
     imageAlt: "Clandeboye Golf Club",
@@ -48,6 +51,7 @@ const fixtures = [
     title: "Monthly Outing",
     date: "July 26",
     course: "Cairndhu",
+    courseWebsiteUrl: "https://www.cairndhugolfclub.co.uk/",
     teeTime: "10.30am",
     imageSrc: "/cairndhu.jpg",
     imageAlt: "Cairndhu Golf Club",
@@ -60,6 +64,7 @@ const fixtures = [
     title: "Monthly Outing",
     date: "August 23",
     course: "Dunmurry",
+    courseWebsiteUrl: "https://www.dunmurrygolfclub.com/",
     teeTime: "11.04am",
     imageSrc: "/dunmurry.jpg",
     imageAlt: "Dunmurry Golf Club",
@@ -72,6 +77,7 @@ const fixtures = [
     title: "Captain's Weekend",
     date: "Sept 26 & 27",
     course: "Slieve Russell",
+    courseWebsiteUrl: "https://www.slieverussell.ie/",
     teeTime: "11.00am both days",
     featured: true,
     imageSrc: "/slieverussell.jpg",
@@ -85,6 +91,7 @@ const fixtures = [
     title: "October Outing",
     date: "October",
     course: "Bangor",
+    courseWebsiteUrl: "https://www.bgcni.co.uk/",
     teeTime: "TBC",
     imageSrc: "/bangor.jpg",
     imageAlt: "Bangor Golf Club",
@@ -137,15 +144,12 @@ export default function FixturesPage() {
                 <p className="text-sm font-medium text-slate-700">{fixture.date}</p>
               </div>
               {fixture.imageSrc ? (
-                <div className="mt-5 overflow-hidden rounded-[1.25rem]">
-                  <Image
-                    src={fixture.imageSrc}
-                    alt={fixture.imageAlt ?? fixture.course}
-                    width={1200}
-                    height={720}
-                    className="h-44 w-full object-cover"
-                  />
-                </div>
+                <FixtureImageLink
+                  course={fixture.course}
+                  imageAlt={fixture.imageAlt}
+                  imageSrc={fixture.imageSrc}
+                  websiteUrl={fixture.courseWebsiteUrl}
+                />
               ) : null}
               <div className="mt-5 grid grid-cols-2 gap-4">
                 <div>
