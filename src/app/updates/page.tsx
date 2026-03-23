@@ -19,7 +19,7 @@ const updates = [
   {
     month: "Season format",
     title: "Monthly golf with key days to look forward to",
-    text: "Alongside the regular outings, notable dates in the calendar include the first outing, Freddie's Day, Captain's Day, and Captain's Weekend in September.",
+    text: "Alongside the regular outings, notable dates in the calendar include the first outing, Freddie's Day, Official Imperial Sponsored Outing, and Captain's Weekend in September.",
   },
 ];
 

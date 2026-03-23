@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import FixtureImageLink from "@/components/FixtureImageLink";
 
 export const metadata: Metadata = {
@@ -98,6 +99,26 @@ const fixtures = [
     mapsUrl: "https://www.google.com/maps/search/?api=1&query=Bangor+Golf+Club",
     sponsorName: "Sponsor TBC",
     sponsorUrl: "#",
+  },
+];
+
+const previousSponsors = [
+  {
+    id: "imperial-bar",
+    name: "Imperial Bar",
+    logoSrc: "/imperial_Sponsor.png",
+    logoAlt: "Imperial Bar sponsor logo",
+    contribution: "Official sponsor and affiliated bar of Imperial Golf Society",
+    sponsorUrl:
+      "https://www.google.com/search?q=Imperial+Bar+Bangor+Northern+Ireland",
+  },
+  {
+    id: "irvines-butchers",
+    name: "Irvine's Butchers",
+    logoSrc: "/irvinesbutchers_sponsor.png",
+    logoAlt: "Irvine's Butchers sponsor logo",
+    contribution: "Supporter of society outing prizes",
+    sponsorUrl: "https://irvinesbutchery.co.uk/",
   },
 ];
 
@@ -203,6 +224,56 @@ export default function FixturesPage() {
             </div>
           </article>
         ))}
+      </section>
+
+      <section className="mx-auto mt-10 max-w-6xl px-4 sm:mt-12 sm:px-6">
+        <div className="rounded-[2rem] bg-[linear-gradient(180deg,_rgba(16,51,37,0.96)_0%,_rgba(13,39,29,0.98)_100%)] px-6 py-8 text-stone-50 shadow-[0_24px_60px_rgba(8,24,18,0.24)] sm:px-8 sm:py-10">
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-amber-200/80">
+            Previous Sponsors
+          </p>
+          <h2 className="mt-3 text-2xl font-semibold sm:text-3xl">
+            Sponsors who help fund our outing prizes
+          </h2>
+          <p className="mt-4 max-w-3xl text-sm leading-7 text-stone-100/80 sm:text-base">
+            Our sponsors help make each outing a bit more special by contributing
+            towards the prizes on the day. Imperial Bar is our official sponsor
+            and affiliated bar, and we&apos;re grateful for every business and
+            supporter that backs the society season after season.
+          </p>
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {previousSponsors.map((sponsor) => (
+              <article
+                key={sponsor.id}
+                className="rounded-[1.5rem] border border-white/10 bg-white/8 p-5 backdrop-blur-sm"
+              >
+                <a
+                  href={sponsor.sponsorUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`Visit ${sponsor.name}`}
+                  className="block"
+                >
+                  <div className="flex min-h-36 items-center justify-center transition duration-300 hover:scale-[1.02]">
+                    <Image
+                      src={sponsor.logoSrc}
+                      alt={sponsor.logoAlt}
+                      width={320}
+                      height={180}
+                      className="h-auto max-h-28 w-auto max-w-full object-contain"
+                    />
+                  </div>
+                </a>
+                <p className="mt-4 text-base font-semibold text-stone-50">
+                  {sponsor.name}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-stone-100/75">
+                  {sponsor.contribution}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
       </section>
     </main>
   );
