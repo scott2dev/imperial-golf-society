@@ -18,7 +18,8 @@ function redirectWithError(message: string) {
 
 export async function claimExistingMember(formData: FormData) {
   const session = await requireSession();
-  const email = session.user.email?.trim().toLowerCase();
+  const user = session?.user;
+  const email = user?.email?.trim().toLowerCase();
   const memberId = getTrimmedString(formData, "memberId");
 
   if (!email) {
@@ -32,7 +33,7 @@ export async function claimExistingMember(formData: FormData) {
   try {
     await linkAuthenticatedUserToMember({
       email,
-      image: session.user.image,
+      image: user?.image,
       memberId,
     });
   } catch (error) {
@@ -48,7 +49,8 @@ export async function claimExistingMember(formData: FormData) {
 
 export async function requestNewMemberProfile(formData: FormData) {
   const session = await requireSession();
-  const email = session.user.email?.trim().toLowerCase();
+  const user = session?.user;
+  const email = user?.email?.trim().toLowerCase();
   const name = getTrimmedString(formData, "name");
   const handicapRaw = getTrimmedString(formData, "handicapIndex");
   const handicapIndex = Number(handicapRaw);
@@ -68,7 +70,7 @@ export async function requestNewMemberProfile(formData: FormData) {
   try {
     await createPendingMemberRequest({
       email,
-      image: session.user.image,
+      image: user?.image,
       name,
       handicapIndex,
     });
