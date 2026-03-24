@@ -20,6 +20,60 @@ type OutingPageProps = {
   }>;
 };
 
+type OutingPageData = {
+  id: string;
+  title: string;
+  outingDate: Date;
+  course: {
+    id: string;
+    name: string;
+    holes: Array<{
+      id: string;
+      holeNumber: number;
+      par: number;
+      strokeIndex: number;
+    }>;
+  };
+  players: Array<{
+    id: string;
+    memberId: string;
+    groupNumber: number;
+    isScorekeeper: boolean;
+    submittedAt: Date | null;
+    playingHandicap: number | { toString(): string };
+    member: {
+      id: string;
+      name: string;
+      handicapIndex: number | { toString(): string };
+    };
+  }>;
+  holeScores: Array<{
+    memberId: string;
+    holeNumber: number;
+    grossStrokes: number;
+    netStrokes: number;
+    stablefordPoints: number;
+    strokesReceived: number;
+  }>;
+  signatures: Array<{
+    memberId: string;
+    groupNumber: number;
+    signatureData: string;
+    signedAt: Date;
+  }>;
+  outingResults: Array<{
+    id: string;
+    memberId: string;
+    totalPoints: number;
+    position: number | null;
+    member: {
+      id: string;
+      name: string;
+      handicapIndex: number | { toString(): string };
+    };
+  }>;
+};
+
 function sumStablefordPoints(
   scores: Array<{ holeNumber: number; stablefordPoints: number }>,
   holeNumbers: number[],
@@ -53,7 +107,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
   const member = await getCurrentMember();
   const { outingId } = await params;
 
-  const outing = await prisma.outing.findUnique({
+  const outing: OutingPageData | null = await prisma.outing.findUnique({
     where: {
       id: outingId,
     },
