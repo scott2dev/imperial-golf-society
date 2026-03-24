@@ -40,7 +40,7 @@ export default function AboutPage() {
             side is just as important.
           </p>
           <p className="mt-4 text-sm leading-7 text-stone-100/85 sm:text-base">
-            Many members enjoy staying on for food and a drink after the round,
+            Many members enjoy staying on for food and drinks after the round,
             and a number also play in extra events hosted by local clubs, with
             Bangor Golf Club featuring heavily among the membership.
           </p>
