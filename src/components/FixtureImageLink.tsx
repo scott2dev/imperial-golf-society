@@ -45,7 +45,7 @@ export default function FixtureImageLink({
         clearTimeout(hideTimerRef.current);
       }
     };
-  }, [handleScroll]);
+  }, []);
 
   return (
     <a

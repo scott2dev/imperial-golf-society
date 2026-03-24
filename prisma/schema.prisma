@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum MemberRole {
+  member
+  captain
+  admin
+}
+
+enum MemberApprovalStatus {
+  approved
+  pending
+}
+
+enum OutingStatus {
+  draft
+  live
+  completed
+  finalized
+}
+
+model Member {
+  id             String               @id @default(cuid())
+  email          String?              @unique
+  name           String               @unique
+  image          String?
+  role           MemberRole           @default(member)
+  approvalStatus MemberApprovalStatus @default(approved)
+  isRegistered   Boolean              @default(false)
+  handicapIndex  Decimal              @default(0) @db.Decimal(5, 1)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  lastLoginAt    DateTime             @default(now())
+  outingPlayers  OutingPlayer[]
+  enteredScores  HoleScore[]          @relation("ScoresEnteredBy")
+  holeScores     HoleScore[]          @relation("PlayerHoleScores")
+  outingResults  OutingResult[]
+  outingSignatures OutingSignature[]
+}
+
+model Course {
+  id                String       @id @default(cuid())
+  name              String       @unique
+  websiteUrl        String?
+  mapsUrl           String?
+  imageSrc          String?
+  imageAlt          String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  holes             CourseHole[]
+  outings           Outing[]
+}
+
+model CourseHole {
+  id          String  @id @default(cuid())
+  courseId    String
+  holeNumber  Int
+  par         Int
+  strokeIndex Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, holeNumber])
+}
+
+model Outing {
+  id            String         @id @default(cuid())
+  sourceFixtureId String?      @unique
+  courseId      String
+  title         String
+  outingDate    DateTime
+  teeTime       String?
+  imageSrc      String?
+  imageAlt      String?
+  sponsorName   String?
+  sponsorUrl    String?
+  featured      Boolean        @default(false)
+  status        OutingStatus   @default(draft)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  course        Course         @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  players       OutingPlayer[]
+  holeScores    HoleScore[]
+  outingResults OutingResult[]
+  signatures    OutingSignature[]
+}
+
+model OutingPlayer {
+  id               String   @id @default(cuid())
+  outingId         String
+  memberId         String
+  courseHandicap   Decimal  @default(0) @db.Decimal(5, 1)
+  playingHandicap  Decimal  @default(0) @db.Decimal(5, 1)
+  groupNumber      Int
+  isScorekeeper    Boolean  @default(false)
+  submittedAt      DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  outing           Outing   @relation(fields: [outingId], references: [id], onDelete: Cascade)
+  member           Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([outingId, memberId])
+}
+
+model HoleScore {
+  id                String   @id @default(cuid())
+  outingId          String
+  memberId          String
+  holeNumber        Int
+  grossStrokes      Int
+  strokesReceived   Int
+  netStrokes        Int
+  stablefordPoints  Int
+  enteredByMemberId String
+  updatedAt         DateTime @updatedAt
+  createdAt         DateTime @default(now())
+  outing            Outing   @relation(fields: [outingId], references: [id], onDelete: Cascade)
+  member            Member   @relation("PlayerHoleScores", fields: [memberId], references: [id], onDelete: Cascade)
+  enteredBy         Member   @relation("ScoresEnteredBy", fields: [enteredByMemberId], references: [id], onDelete: Restrict)
+
+  @@unique([outingId, memberId, holeNumber])
+}
+
+model OutingResult {
+  id          String   @id @default(cuid())
+  outingId    String
+  memberId    String
+  totalPoints Int
+  position    Int?
+  isLocked    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  outing      Outing   @relation(fields: [outingId], references: [id], onDelete: Cascade)
+  member      Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([outingId, memberId])
+}
+
+model OutingSignature {
+  id            String   @id @default(cuid())
+  outingId      String
+  memberId      String
+  groupNumber   Int
+  signatureData String
+  signedAt      DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  outing        Outing   @relation(fields: [outingId], references: [id], onDelete: Cascade)
+  member        Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([outingId, memberId])
+}

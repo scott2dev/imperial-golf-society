@@ -29,7 +29,7 @@ export default function MembersPage() {
             />
           </div>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-stone-100/85 sm:text-base">
-            This page is set up to track each member's handicap and how many
+            This page is set up to track each member&apos;s handicap and how many
             times they have won the main society prizes across the season.
           </p>
         </div>

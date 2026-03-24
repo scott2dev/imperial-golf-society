@@ -3,7 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { signOut, useSession } from "next-auth/react";
 import { navItems, siteName } from "@/lib/site-data";
 
 function isActive(pathname: string, href: string) {
@@ -18,10 +19,8 @@ export default function SiteHeader() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const isHomePage = pathname === "/";
-
-  useEffect(() => {
-    setIsOpen(false);
-  }, [pathname]);
+  const { status } = useSession();
+  const isSignedIn = status === "authenticated";
 
   return (
     <header
@@ -83,6 +82,7 @@ export default function SiteHeader() {
                   <li key={item.href}>
                     <Link
                       href={item.href}
+                      onClick={() => setIsOpen(false)}
                       className={`inline-flex rounded-full px-4 py-2 text-sm font-medium transition ${
                         active
                           ? "bg-[#f3e1ae] text-[#173021] ring-1 ring-white/55 shadow-sm"
@@ -96,6 +96,25 @@ export default function SiteHeader() {
                   </li>
                 );
               })}
+              <li>
+                {isSignedIn ? (
+                  <button
+                    type="button"
+                    onClick={() => signOut({ callbackUrl: "/" })}
+                    className="inline-flex rounded-full border border-white/25 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/12"
+                  >
+                    Sign out
+                  </button>
+                ) : (
+                  <Link
+                    href="/login"
+                    onClick={() => setIsOpen(false)}
+                    className="inline-flex rounded-full border border-white/25 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/12"
+                  >
+                    Login
+                  </Link>
+                )}
+              </li>
             </ul>
           </nav>
         </div>
@@ -113,6 +132,7 @@ export default function SiteHeader() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
+                    onClick={() => setIsOpen(false)}
                     className={`flex items-center justify-between rounded-2xl px-4 py-3 text-base font-medium transition ${
                       active
                         ? "bg-[#f3e1ae] text-[#173021] shadow-sm ring-1 ring-white/55"
@@ -132,6 +152,30 @@ export default function SiteHeader() {
                 </li>
               );
             })}
+            <li>
+              {isSignedIn ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOpen(false);
+                    signOut({ callbackUrl: "/" });
+                  }}
+                  className="flex w-full items-center justify-between rounded-2xl bg-white/10 px-4 py-3 text-base font-medium text-white transition hover:bg-white/16"
+                >
+                  <span>Sign out</span>
+                  <span aria-hidden="true">-</span>
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center justify-between rounded-2xl bg-white/10 px-4 py-3 text-base font-medium text-white transition hover:bg-white/16"
+                >
+                  <span>Login</span>
+                  <span aria-hidden="true">+</span>
+                </Link>
+              )}
+            </li>
           </ul>
         </nav>
       </div>
