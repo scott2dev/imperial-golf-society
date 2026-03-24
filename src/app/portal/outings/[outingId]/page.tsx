@@ -241,10 +241,13 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
         )[0] ?? null
       : null;
 
-  function getNineHoleWinner(holeNumbers: number[]) {
+  function getNineHoleWinner(holeNumbers: number[], excludedMemberIds = new Set<string>()) {
     return (
       outing.players
-        .filter((player) => !podiumIds.has(player.memberId))
+        .filter(
+          (player) =>
+            !podiumIds.has(player.memberId) && !excludedMemberIds.has(player.memberId),
+        )
         .map((player) => {
           const playerScores = scoresByPlayer.get(player.memberId) ?? [];
 
@@ -264,7 +267,12 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
   }
 
   const frontNineWinner = allGroupsSubmitted ? getNineHoleWinner(frontNine) : null;
-  const backNineWinner = allGroupsSubmitted ? getNineHoleWinner(backNine) : null;
+  const backNineWinner = allGroupsSubmitted
+    ? getNineHoleWinner(
+        backNine,
+        new Set(frontNineWinner ? [frontNineWinner.player.memberId] : []),
+      )
+    : null;
   const visibleScorecardScores = Object.fromEntries(
     outing.course.holes.map((hole) => [
       hole.holeNumber,
@@ -513,13 +521,13 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                       </div>
                       <div className="mt-4 overflow-x-auto rounded-[1rem] border border-[var(--border)] bg-white">
                         <table className="min-w-full border-collapse text-left text-sm">
-                          <thead className="bg-[var(--surface)] text-[var(--brand-dark)]">
+                          <thead className="text-[var(--brand-dark)]">
                             <tr>
-                              <th className="px-2 py-1.5 font-semibold">Hole</th>
-                              <th className="px-2 py-1.5 font-semibold">Par</th>
-                              <th className="px-2 py-1.5 font-semibold">Gross</th>
-                              <th className="px-2 py-1.5 font-semibold">Net</th>
-                              <th className="px-2 py-1.5 font-semibold">Pts</th>
+                              <th className="bg-[var(--surface)] px-2 py-1.5 font-semibold">Hole</th>
+                              <th className="bg-amber-50/80 px-2 py-1.5 font-semibold">Par</th>
+                              <th className="bg-stone-50 px-2 py-1.5 font-semibold">Gross</th>
+                              <th className="bg-sky-50/80 px-2 py-1.5 font-semibold">Net</th>
+                              <th className="bg-emerald-50/80 px-2 py-1.5 font-semibold">Pts</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -533,17 +541,17 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                                   key={`${player.memberId}-submitted-${hole.holeNumber}`}
                                   className="border-t border-[var(--border)]"
                                 >
-                                  <td className="px-2 py-1.5 font-semibold text-[var(--brand-dark)]">
+                                  <td className="bg-[var(--surface)] px-2 py-1.5 font-semibold text-[var(--brand-dark)]">
                                     {hole.holeNumber}
                                   </td>
-                                  <td className="px-2 py-1.5 text-slate-700">{hole.par}</td>
-                                  <td className="px-2 py-1.5 text-slate-700">
+                                  <td className="bg-amber-50/60 px-2 py-1.5 text-slate-700">{hole.par}</td>
+                                  <td className="bg-stone-50 px-2 py-1.5 text-slate-700">
                                     <ScoreMarker grossStrokes={score?.grossStrokes} par={hole.par} />
                                   </td>
-                                  <td className="px-2 py-1.5 text-slate-700">
+                                  <td className="bg-sky-50/60 px-2 py-1.5 text-slate-700">
                                     {score?.netStrokes ?? "—"}
                                   </td>
-                                  <td className="px-2 py-1.5 font-semibold text-[var(--brand-dark)]">
+                                  <td className="bg-emerald-50/60 px-2 py-1.5 font-semibold text-[var(--brand-dark)]">
                                     {score?.stablefordPoints ?? "—"}
                                   </td>
                                 </tr>
@@ -893,13 +901,13 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                         </summary>
                         <div className="mt-4 overflow-x-auto rounded-[1rem] border border-[var(--border)] bg-white">
                           <table className="min-w-full border-collapse text-left text-sm">
-                            <thead className="bg-[var(--surface)] text-[var(--brand-dark)]">
+                            <thead className="text-[var(--brand-dark)]">
                               <tr>
-                                <th className="px-2 py-1.5 font-semibold">Hole</th>
-                                <th className="px-2 py-1.5 font-semibold">Par</th>
-                                <th className="px-2 py-1.5 font-semibold">Gross</th>
-                                <th className="px-2 py-1.5 font-semibold">Net</th>
-                                <th className="px-2 py-1.5 font-semibold">Pts</th>
+                                <th className="bg-[var(--surface)] px-2 py-1.5 font-semibold">Hole</th>
+                                <th className="bg-amber-50/80 px-2 py-1.5 font-semibold">Par</th>
+                                <th className="bg-stone-50 px-2 py-1.5 font-semibold">Gross</th>
+                                <th className="bg-sky-50/80 px-2 py-1.5 font-semibold">Net</th>
+                                <th className="bg-emerald-50/80 px-2 py-1.5 font-semibold">Pts</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -913,17 +921,17 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                                     key={`${result.memberId}-${hole.holeNumber}`}
                                     className="border-t border-[var(--border)]"
                                   >
-                                    <td className="px-2 py-1.5 font-semibold text-[var(--brand-dark)]">
+                                    <td className="bg-[var(--surface)] px-2 py-1.5 font-semibold text-[var(--brand-dark)]">
                                       {hole.holeNumber}
                                     </td>
-                                    <td className="px-2 py-1.5 text-slate-700">{hole.par}</td>
-                                    <td className="px-2 py-1.5 text-slate-700">
+                                    <td className="bg-amber-50/60 px-2 py-1.5 text-slate-700">{hole.par}</td>
+                                    <td className="bg-stone-50 px-2 py-1.5 text-slate-700">
                                       <ScoreMarker grossStrokes={score?.grossStrokes} par={hole.par} />
                                     </td>
-                                    <td className="px-2 py-1.5 text-slate-700">
+                                    <td className="bg-sky-50/60 px-2 py-1.5 text-slate-700">
                                       {score?.netStrokes ?? "—"}
                                     </td>
-                                    <td className="px-2 py-1.5 font-semibold text-[var(--brand-dark)]">
+                                    <td className="bg-emerald-50/60 px-2 py-1.5 font-semibold text-[var(--brand-dark)]">
                                       {score?.stablefordPoints ?? "—"}
                                     </td>
                                   </tr>
