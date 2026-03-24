@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import SignOutButton from "@/components/auth/SignOutButton";
 import { getSession } from "@/lib/auth";
+import type { MemberRecord } from "@/lib/member-store";
 import { getApprovedUnlinkedMembers } from "@/lib/member-store";
 import { claimExistingMember, requestNewMemberProfile } from "./actions";
 import { redirect } from "next/navigation";
@@ -33,7 +34,10 @@ export default async function MemberOnboardingPage({
     redirect("/portal/pending");
   }
 
-  const [availableMembers, params] = await Promise.all([
+  const [availableMembers, params]: [
+    MemberRecord[],
+    Awaited<OnboardingPageProps["searchParams"]>,
+  ] = await Promise.all([
     getApprovedUnlinkedMembers(),
     searchParams,
   ]);
