@@ -362,7 +362,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                         type="submit"
                         className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--brand)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
                       >
-                        {currentScorekeeper ? "Take over scorekeeping" : "I&apos;ll keep score"}
+                        {currentScorekeeper ? "Take over scorekeeping" : "I'll keep score"}
                       </button>
                     </form>
                   ) : (
