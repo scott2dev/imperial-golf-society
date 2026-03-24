@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentMember } from "@/lib/auth";
 import { GroupSignatureBoard } from "@/components/scoring/GroupSignatureBoard";
+import { ConfirmActionModal } from "@/components/admin/ConfirmActionModal";
 import { OutingScorecard } from "@/components/scoring/OutingScorecard";
 import { ScoreMarker } from "@/components/scoring/ScoreMarker";
 import { ScoreInput } from "@/components/scoring/ScoreInput";
@@ -454,24 +455,15 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                         {submittedGroups.has(groupNumber) ? "Submitted" : "Still in progress"}
                       </span>
                       {isCaptainOrAdmin && submittedGroups.has(groupNumber) ? (
-                        <form action={removeGroupSubmission} className="flex flex-wrap items-end gap-2">
-                          <input type="hidden" name="outingId" value={outing.id} />
-                          <input type="hidden" name="groupNumber" value={groupNumber} />
-                          <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                            Type REMOVE
-                            <input
-                              name="confirmation"
-                              placeholder="REMOVE"
-                              className="mt-1 w-24 rounded-xl border border-rose-200 bg-white px-2.5 py-1.5 text-[11px] uppercase text-slate-900 outline-none transition focus:border-rose-400"
-                            />
-                          </label>
-                          <button
-                            type="submit"
-                            className="inline-flex min-h-9 items-center justify-center rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-rose-800 transition hover:bg-rose-100"
-                          >
-                            Remove submission
-                          </button>
-                        </form>
+                        <ConfirmActionModal
+                          action={removeGroupSubmission}
+                          buttonLabel="Remove submission"
+                          buttonClassName="inline-flex min-h-9 items-center justify-center rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-rose-800 transition hover:bg-rose-100"
+                          title={`Remove Group ${groupNumber} submission`}
+                          description="This will reopen the group's round so its scores can be edited again."
+                          confirmWord="REMOVE"
+                          hiddenFields={{ outingId: outing.id, groupNumber }}
+                        />
                       ) : null}
                     </div>
                   </div>
@@ -489,32 +481,23 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
               </div>
             ) : null}
             {isAdmin && !canShowCaptainResults ? (
-              <form
-                action={finalizeOutingSubmissions}
-                className="mt-4 rounded-[1.5rem] border border-amber-200 bg-amber-50 px-4 py-4"
-              >
-                <input type="hidden" name="outingId" value={outing.id} />
+              <div className="mt-4 rounded-[1.5rem] border border-amber-200 bg-amber-50 px-4 py-4">
                 <p className="text-sm font-semibold text-amber-900">Finalize submissions</p>
                 <p className="mt-1 text-sm text-amber-800">
                   Use this only if a group cannot submit. This will unlock the captain results using the scores currently saved.
                 </p>
-                <div className="mt-3 flex flex-wrap items-end gap-3">
-                  <label className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-900">
-                    Type FINALIZE
-                    <input
-                      name="confirmation"
-                      placeholder="FINALIZE"
-                      className="mt-2 w-32 rounded-xl border border-amber-300 bg-white px-3 py-2 text-sm uppercase text-slate-900 outline-none transition focus:border-amber-500"
-                    />
-                  </label>
-                  <button
-                    type="submit"
-                    className="inline-flex min-h-10 items-center justify-center rounded-full border border-amber-300 bg-white px-4 py-2 text-sm font-semibold text-amber-900 transition hover:bg-amber-100"
-                  >
-                    Finalize submissions
-                  </button>
+                <div className="mt-3">
+                  <ConfirmActionModal
+                    action={finalizeOutingSubmissions}
+                    buttonLabel="Finalize submissions"
+                    buttonClassName="inline-flex min-h-10 items-center justify-center rounded-full border border-amber-300 bg-white px-4 py-2 text-sm font-semibold text-amber-900 transition hover:bg-amber-100"
+                    title="Finalize outing submissions"
+                    description="Use this only if a group cannot submit. The outing will be locked and captain results will open using the scores saved so far."
+                    confirmWord="FINALIZE"
+                    hiddenFields={{ outingId: outing.id }}
+                  />
                 </div>
-              </form>
+              </div>
             ) : null}
           </aside>
         </div>

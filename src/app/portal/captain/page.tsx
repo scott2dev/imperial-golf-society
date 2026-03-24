@@ -15,6 +15,7 @@ import {
   updateOuting,
   updateOutingGroups,
 } from "@/app/portal/captain/actions";
+import { ConfirmActionModal } from "@/components/admin/ConfirmActionModal";
 import OutingGroupsEditor from "@/components/captain/OutingGroupsEditor";
 import { requireCaptain } from "@/lib/auth";
 import { defaultParForHole } from "@/lib/course-defaults";
@@ -464,23 +465,15 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                             Approve member
                           </button>
                         </form>
-                        <form action={removeMemberRequest} className="flex flex-wrap items-end gap-3">
-                          <input type="hidden" name="memberId" value={member.id} />
-                          <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                            Type REMOVE
-                            <input
-                              name="confirmation"
-                              placeholder="REMOVE"
-                              className="mt-2 w-28 rounded-xl border border-rose-200 bg-white px-3 py-2 text-sm uppercase text-slate-900 outline-none transition focus:border-rose-400"
-                            />
-                          </label>
-                          <button
-                            type="submit"
-                            className="inline-flex min-h-10 items-center justify-center rounded-full border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50"
-                          >
-                            Remove request
-                          </button>
-                        </form>
+                        <ConfirmActionModal
+                          action={removeMemberRequest}
+                          buttonLabel="Remove request"
+                          buttonClassName="inline-flex min-h-10 items-center justify-center rounded-full border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50"
+                          title="Remove member request"
+                          description="This will remove the pending request from the member list."
+                          confirmWord="REMOVE"
+                          hiddenFields={{ memberId: member.id }}
+                        />
                       </div>
                     </article>
                   ))
@@ -572,14 +565,21 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                           </p>
                         </div>
                         {member.email ? (
-                          <form action={reassignMemberEmailLink} className="flex flex-wrap items-end gap-3">
-                            <input type="hidden" name="sourceMemberId" value={member.id} />
+                          <ConfirmActionModal
+                            action={reassignMemberEmailLink}
+                            buttonLabel="Move linked account"
+                            buttonClassName="inline-flex min-h-10 items-center justify-center rounded-full border border-amber-200 px-4 py-2 text-sm font-semibold text-amber-900 transition hover:bg-amber-50"
+                            title="Move linked account"
+                            description="Choose the approved member who should receive this linked email."
+                            confirmWord="RELINK"
+                            hiddenFields={{ sourceMemberId: member.id }}
+                          >
                             <label className="text-sm font-semibold text-[var(--brand-dark)]">
                               Move linked email to
                               <select
                                 name="targetMemberId"
                                 defaultValue=""
-                                className="mt-2 min-w-52 rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm outline-none transition focus:border-[var(--brand)]"
+                                className="mt-2 w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm outline-none transition focus:border-[var(--brand)]"
                               >
                                 <option value="" disabled>
                                   Select member
@@ -591,27 +591,16 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                                       candidate.approvalStatus === "approved",
                                   )
                                   .map((candidate) => (
-                                    <option key={`${member.id}-relink-${candidate.id}`} value={candidate.id}>
+                                    <option
+                                      key={`${member.id}-relink-${candidate.id}`}
+                                      value={candidate.id}
+                                    >
                                       {candidate.name}
                                     </option>
                                   ))}
                               </select>
                             </label>
-                            <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                              Type RELINK
-                              <input
-                                name="confirmation"
-                                placeholder="RELINK"
-                                className="mt-2 w-28 rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm uppercase text-slate-900 outline-none transition focus:border-amber-400"
-                              />
-                            </label>
-                            <button
-                              type="submit"
-                              className="inline-flex min-h-10 items-center justify-center rounded-full border border-amber-200 px-4 py-2 text-sm font-semibold text-amber-900 transition hover:bg-amber-50"
-                            >
-                              Move linked account
-                            </button>
-                          </form>
+                          </ConfirmActionModal>
                         ) : (
                           <p className="text-sm text-slate-600">
                             No linked email on this member yet.
@@ -626,23 +615,15 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                             This is only available when the member has no outing assignments or scoring history.
                           </p>
                         </div>
-                        <form action={deleteMember} className="flex flex-wrap items-end gap-3">
-                          <input type="hidden" name="memberId" value={member.id} />
-                          <label className="text-xs font-semibold uppercase tracking-[0.14em] text-rose-800">
-                            Type DELETE
-                            <input
-                              name="confirmation"
-                              placeholder="DELETE"
-                              className="mt-2 w-28 rounded-xl border border-rose-200 bg-white px-3 py-2 text-sm uppercase text-slate-900 outline-none transition focus:border-rose-400"
-                            />
-                          </label>
-                          <button
-                            type="submit"
-                            className="inline-flex min-h-10 items-center justify-center rounded-full border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
-                          >
-                            Delete member
-                          </button>
-                        </form>
+                        <ConfirmActionModal
+                          action={deleteMember}
+                          buttonLabel="Delete member"
+                          buttonClassName="inline-flex min-h-10 items-center justify-center rounded-full border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
+                          title="Delete member"
+                          description="This is only available when the member has no outing assignments or scoring history."
+                          confirmWord="DELETE"
+                          hiddenFields={{ memberId: member.id }}
+                        />
                       </div>
                     </article>
                   ))}
@@ -764,23 +745,17 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                           Save course details
                         </button>
                       </form>
-                      <form action={deleteCourse} className="mt-3 flex flex-wrap items-end gap-3">
-                        <input type="hidden" name="courseId" value={course.id} />
-                        <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                          Type DELETE
-                          <input
-                            name="confirmation"
-                            placeholder="DELETE"
-                            className="mt-2 w-28 rounded-xl border border-rose-200 bg-white px-3 py-2 text-sm uppercase text-slate-900 outline-none transition focus:border-rose-400"
-                          />
-                        </label>
-                        <button
-                          type="submit"
-                          className="inline-flex min-h-10 items-center justify-center rounded-full border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50"
-                        >
-                          Delete course
-                        </button>
-                      </form>
+                      <div className="mt-3">
+                        <ConfirmActionModal
+                          action={deleteCourse}
+                          buttonLabel="Delete course"
+                          buttonClassName="inline-flex min-h-10 items-center justify-center rounded-full border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50"
+                          title="Delete course"
+                          description="This will remove the course if it is not linked to any outings."
+                          confirmWord="DELETE"
+                          hiddenFields={{ courseId: course.id }}
+                        />
+                      </div>
                     </details>
                   ))
                 )}
@@ -925,23 +900,17 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                           </Link>
                         </div>
                       </form>
-                      <form action={deleteOuting} className="mt-3 flex flex-wrap items-end gap-3">
-                        <input type="hidden" name="outingId" value={outing.id} />
-                        <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                          Type DELETE
-                          <input
-                            name="confirmation"
-                            placeholder="DELETE"
-                            className="mt-2 w-28 rounded-xl border border-rose-200 bg-white px-3 py-2 text-sm uppercase text-slate-900 outline-none transition focus:border-rose-400"
-                          />
-                        </label>
-                        <button
-                          type="submit"
-                          className="inline-flex min-h-10 items-center justify-center rounded-full border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50"
-                        >
-                          Delete outing
-                        </button>
-                      </form>
+                      <div className="mt-3">
+                        <ConfirmActionModal
+                          action={deleteOuting}
+                          buttonLabel="Delete outing"
+                          buttonClassName="inline-flex min-h-10 items-center justify-center rounded-full border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50"
+                          title="Delete outing"
+                          description="This will remove the outing and its related grouping and scoring data."
+                          confirmWord="DELETE"
+                          hiddenFields={{ outingId: outing.id }}
+                        />
+                      </div>
                     </details>
                   ))
                 )}
