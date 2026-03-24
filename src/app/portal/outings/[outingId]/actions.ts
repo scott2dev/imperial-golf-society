@@ -389,7 +389,7 @@ export async function submitGroupRound(formData: FormData) {
     },
   });
 
-  const scoreCounts = (await prisma.holeScore.groupBy({
+  const rawScoreCounts = await prisma.holeScore.groupBy({
     by: ["memberId"],
     where: {
       outingId,
@@ -400,7 +400,8 @@ export async function submitGroupRound(formData: FormData) {
     _count: {
       holeNumber: true,
     },
-  })) as ScoreCountEntry[];
+  });
+  const scoreCounts = rawScoreCounts as ScoreCountEntry[];
 
   const countsByMember = new Map(
     scoreCounts.map((entry) => [entry.memberId, entry._count.holeNumber]),
