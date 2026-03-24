@@ -44,6 +44,18 @@ type SaveScoresTransaction = {
   };
 };
 
+type GroupPlayerAssignment = Array<{
+  id: string;
+  memberId: string;
+  groupNumber: number;
+  playingHandicap: number | { toString(): string };
+  member: {
+    id: string;
+    name: string;
+    email: string | null;
+  };
+}>;
+
 async function getAssignmentForMember(outingId: string, memberId: string) {
   return prisma.outingPlayer.findUnique({
     where: {
@@ -84,7 +96,7 @@ async function getGroupPlayersForAssignment(outingId: string, groupNumber: numbe
         name: "asc",
       },
     },
-  });
+  }) as Promise<GroupPlayerAssignment>;
 }
 
 async function updateOutingResults(outingId: string) {
