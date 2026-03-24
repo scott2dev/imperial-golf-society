@@ -13,12 +13,14 @@ type PlayerSignature = {
 
 type GroupSignatureBoardProps = {
   isScorekeeper: boolean;
+  isSubmitted: boolean;
   outingId: string;
   players: PlayerSignature[];
 };
 
 export function GroupSignatureBoard({
   isScorekeeper,
+  isSubmitted,
   outingId,
   players,
 }: GroupSignatureBoardProps) {
@@ -29,6 +31,7 @@ export function GroupSignatureBoard({
   const [signatureOverrides, setSignatureOverrides] = useState<Record<string, PlayerSignature>>({});
   const [saveError, setSaveError] = useState<string | null>(null);
   const [hasInk, setHasInk] = useState(false);
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const signatures = Object.fromEntries(
@@ -93,7 +96,7 @@ export function GroupSignatureBoard({
   }
 
   function startDrawing(event: ReactPointerEvent<HTMLCanvasElement>) {
-    if (!isScorekeeper) {
+    if (!isScorekeeper || isSubmitted) {
       return;
     }
 
@@ -179,6 +182,7 @@ export function GroupSignatureBoard({
           },
         }));
         clearCanvas();
+        setIsPanelOpen(false);
       } catch {
         setSaveError("Signature could not be saved. Please try again.");
       }
@@ -213,25 +217,29 @@ export function GroupSignatureBoard({
                 {signatures[player.memberId]?.signatureData ? "Signed" : "Awaiting signature"}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedMemberId(player.memberId);
-                setHasInk(false);
-              }}
-              className="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface)]"
-            >
-              {signatures[player.memberId]?.signatureData ? "Replace signature" : "Collect signature"}
-            </button>
+            {!isSubmitted ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedMemberId(player.memberId);
+                  setHasInk(false);
+                  setSaveError(null);
+                  setIsPanelOpen(true);
+                }}
+                className="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface)]"
+              >
+                {signatures[player.memberId]?.signatureData ? "Replace signature" : "Collect signature"}
+              </button>
+            ) : null}
           </div>
         ))}
       </div>
 
-      {allPlayersSigned ? (
+      {allPlayersSigned && !isPanelOpen ? (
         <div className="mt-6 rounded-[1.5rem] border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-800">
           All players in this group have now signed the scorecard.
         </div>
-      ) : selectedPlayer ? (
+      ) : isPanelOpen && selectedPlayer ? (
         <div className="mt-6 rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface-strong)] p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -272,7 +280,7 @@ export function GroupSignatureBoard({
             <button
               type="button"
               onClick={saveSignature}
-              disabled={!isScorekeeper || isPending}
+              disabled={!isScorekeeper || isSubmitted || isPending}
               className="inline-flex min-h-10 items-center justify-center rounded-full bg-[var(--brand)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isPending ? "Saving signature..." : "Save signature"}
@@ -283,6 +291,10 @@ export function GroupSignatureBoard({
           {!isScorekeeper ? (
             <p className="mt-3 text-sm text-slate-600">
               Only the current scorekeeper can collect signatures for this group.
+            </p>
+          ) : isSubmitted ? (
+            <p className="mt-3 text-sm text-slate-600">
+              This group has already submitted its round, so signatures are locked.
             </p>
           ) : null}
         </div>

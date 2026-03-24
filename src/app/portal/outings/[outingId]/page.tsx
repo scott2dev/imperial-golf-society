@@ -194,6 +194,9 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
   const allVisiblePlayersSigned =
     visiblePlayers.length > 0 &&
     visiblePlayers.every((player) => signedVisibleMemberIds.has(player.memberId));
+  const isVisibleGroupSubmitted = memberAssignment
+    ? submittedGroups.has(memberAssignment.groupNumber)
+    : false;
   const allGroupsSubmitted =
     outing.players.length > 0 && outing.players.every((player) => player.submittedAt !== null);
   const frontNine = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -441,26 +444,6 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
               )}
             </div>
 
-            {memberAssignment?.isScorekeeper && !submittedGroups.has(memberAssignment.groupNumber) ? (
-              <>
-                <div className="mt-6 rounded-[1.5rem] bg-[var(--surface-strong)] px-4 py-4 text-sm text-slate-700">
-                  {allVisiblePlayersSigned
-                    ? "All players in this group have signed the scorecard."
-                    : `${visibleSignatures.length} of ${visiblePlayers.length} players have signed the scorecard.`}
-                </div>
-                <form action={submitGroupRound} className="mt-4">
-                  <input type="hidden" name="outingId" value={outing.id} />
-                  <button
-                    type="submit"
-                    disabled={!allVisiblePlayersSigned}
-                    className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] px-5 py-2.5 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface-strong)] disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Submit this group round
-                  </button>
-                </form>
-              </>
-            ) : null}
-
             {isCaptainOrAdmin ? (
               <div className="mt-6 rounded-[1.5rem] bg-[var(--surface-strong)] px-4 py-4 text-sm text-slate-700">
                 {allGroupsSubmitted
@@ -519,6 +502,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
             <GroupSignatureBoard
               outingId={outing.id}
               isScorekeeper={memberAssignment.isScorekeeper}
+              isSubmitted={isVisibleGroupSubmitted}
               players={visiblePlayers.map((player) => {
                 const signature =
                   visibleSignatures.find((entry) => entry.memberId === player.memberId) ?? null;
@@ -531,6 +515,23 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                 };
               })}
             />
+            <div className="mt-6 rounded-[1.5rem] bg-[var(--surface-strong)] px-4 py-4 text-sm text-slate-700">
+              {allVisiblePlayersSigned
+                ? "All players in this group have signed the scorecard."
+                : `${visibleSignatures.length} of ${visiblePlayers.length} players have signed the scorecard.`}
+            </div>
+            {memberAssignment.isScorekeeper && !isVisibleGroupSubmitted ? (
+              <form action={submitGroupRound} className="mt-4">
+                <input type="hidden" name="outingId" value={outing.id} />
+                <button
+                  type="submit"
+                  disabled={!allVisiblePlayersSigned}
+                  className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] px-5 py-2.5 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface-strong)] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Submit this group round
+                </button>
+              </form>
+            ) : null}
             {false ? (
             <div className="mt-6 grid gap-4 lg:grid-cols-2">
               {outing.course.holes.map((hole) => (
