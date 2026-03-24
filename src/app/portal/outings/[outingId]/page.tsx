@@ -398,6 +398,14 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                       </article>
                     ))}
                 </div>
+                {!isVisibleGroupSubmitted ? (
+                  <a
+                    href="#group-scorecards"
+                    className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] px-5 py-2.5 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface-strong)]"
+                  >
+                    Review full scorecards before signing
+                  </a>
+                ) : null}
               </>
             ) : (
               <p className="mt-4 text-sm leading-6 text-slate-700">
@@ -456,82 +464,167 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
       </section>
 
       {memberAssignment ? (
-        <section className="mx-auto mt-6 max-w-6xl px-4 sm:px-6">
+        <section id="group-scorecards" className="mx-auto mt-6 max-w-6xl px-4 sm:px-6">
           <div className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand)]">
-              Hole Entry
+              {isVisibleGroupSubmitted ? "Submitted Scorecards" : "Hole Entry"}
             </p>
             <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)]">
-              Hole-by-hole scoring
+              {isVisibleGroupSubmitted ? "Signed group scorecards" : "Hole-by-hole scoring"}
             </h2>
-            <div className="mt-5 rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand)]">
-                Group Handicap Reference
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {visiblePlayers.map((player) => (
-                  <div
-                    key={`handicap-reference-${player.memberId}`}
-                    className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--brand-dark)]"
-                  >
-                    <span className="font-semibold">{player.member.name}</span>
-                    <span className="text-slate-600">
-                      {" "}
-                      ({Number(player.playingHandicap).toFixed(1)})
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <OutingScorecard
-              outingId={outing.id}
-              holes={outing.course.holes.map((hole) => ({
-                id: hole.id,
-                holeNumber: hole.holeNumber,
-                par: hole.par,
-                strokeIndex: hole.strokeIndex,
-              }))}
-              players={visiblePlayers.map((player) => ({
-                id: player.id,
-                memberId: player.memberId,
-                name: player.member.name,
-              }))}
-              initialScoresByHole={visibleScorecardScores}
-              isScorekeeper={memberAssignment.isScorekeeper}
-            />
-            <GroupSignatureBoard
-              outingId={outing.id}
-              isScorekeeper={memberAssignment.isScorekeeper}
-              isSubmitted={isVisibleGroupSubmitted}
-              players={visiblePlayers.map((player) => {
-                const signature =
-                  visibleSignatures.find((entry) => entry.memberId === player.memberId) ?? null;
+            {isVisibleGroupSubmitted ? (
+              <div className="mt-6 grid gap-4">
+                {visiblePlayers.map((player) => {
+                  const signature =
+                    visibleSignatures.find((entry) => entry.memberId === player.memberId) ?? null;
+                  const playerScores = (scoresByPlayer.get(player.memberId) ?? []).sort(
+                    (left, right) => left.holeNumber - right.holeNumber,
+                  );
 
-                return {
-                  memberId: player.memberId,
-                  name: player.member.name,
-                  signatureData: signature?.signatureData ?? null,
-                  signedAt: signature?.signedAt.toISOString() ?? null,
-                };
-              })}
-            />
-            <div className="mt-6 rounded-[1.5rem] bg-[var(--surface-strong)] px-4 py-4 text-sm text-slate-700">
-              {allVisiblePlayersSigned
-                ? "All players in this group have signed the scorecard."
-                : `${visibleSignatures.length} of ${visiblePlayers.length} players have signed the scorecard.`}
-            </div>
-            {memberAssignment.isScorekeeper && !isVisibleGroupSubmitted ? (
-              <form action={submitGroupRound} className="mt-4">
-                <input type="hidden" name="outingId" value={outing.id} />
-                <button
-                  type="submit"
-                  disabled={!allVisiblePlayersSigned}
-                  className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] px-5 py-2.5 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface-strong)] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  Submit this group round
-                </button>
-              </form>
-            ) : null}
+                  return (
+                    <article
+                      key={`submitted-scorecard-${player.memberId}`}
+                      className="rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface-strong)] p-4"
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-4">
+                        <div>
+                          <p className="font-semibold text-[var(--brand-dark)]">
+                            {player.member.name}
+                          </p>
+                          <p className="mt-1 text-sm text-slate-600">
+                            Handicap {Number(player.playingHandicap).toFixed(1)} •{" "}
+                            {calculateStablefordTotal(playerScores)} pts
+                          </p>
+                        </div>
+                        {signature?.signatureData ? (
+                          <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[#faf7f1]">
+                            <img
+                              src={signature.signatureData}
+                              alt={`${player.member.name} signature`}
+                              className="h-12 w-24 object-contain"
+                            />
+                          </div>
+                        ) : (
+                          <div className="inline-flex h-12 w-24 items-center justify-center rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)] text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                            Unsigned
+                          </div>
+                        )}
+                      </div>
+                      <div className="mt-4 overflow-x-auto rounded-[1rem] border border-[var(--border)] bg-white">
+                        <table className="min-w-full border-collapse text-left text-sm">
+                          <thead className="bg-[var(--surface)] text-[var(--brand-dark)]">
+                            <tr>
+                              <th className="px-3 py-2 font-semibold">Hole</th>
+                              <th className="px-3 py-2 font-semibold">Gross</th>
+                              <th className="px-3 py-2 font-semibold">Net</th>
+                              <th className="px-3 py-2 font-semibold">Pts</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {outing.course.holes.map((hole) => {
+                              const score =
+                                playerScores.find((entry) => entry.holeNumber === hole.holeNumber) ??
+                                null;
+
+                              return (
+                                <tr
+                                  key={`${player.memberId}-submitted-${hole.holeNumber}`}
+                                  className="border-t border-[var(--border)]"
+                                >
+                                  <td className="px-3 py-2 font-semibold text-[var(--brand-dark)]">
+                                    {hole.holeNumber}
+                                  </td>
+                                  <td className="px-3 py-2 text-slate-700">
+                                    {score?.grossStrokes ?? "—"}
+                                  </td>
+                                  <td className="px-3 py-2 text-slate-700">
+                                    {score?.netStrokes ?? "—"}
+                                  </td>
+                                  <td className="px-3 py-2 font-semibold text-[var(--brand-dark)]">
+                                    {score?.stablefordPoints ?? "—"}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            ) : (
+              <>
+                <div className="mt-5 rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand)]">
+                    Group Handicap Reference
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {visiblePlayers.map((player) => (
+                      <div
+                        key={`handicap-reference-${player.memberId}`}
+                        className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--brand-dark)]"
+                      >
+                        <span className="font-semibold">{player.member.name}</span>
+                        <span className="text-slate-600">
+                          {" "}
+                          ({Number(player.playingHandicap).toFixed(1)})
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <OutingScorecard
+                  outingId={outing.id}
+                  holes={outing.course.holes.map((hole) => ({
+                    id: hole.id,
+                    holeNumber: hole.holeNumber,
+                    par: hole.par,
+                    strokeIndex: hole.strokeIndex,
+                  }))}
+                  players={visiblePlayers.map((player) => ({
+                    id: player.id,
+                    memberId: player.memberId,
+                    name: player.member.name,
+                  }))}
+                  initialScoresByHole={visibleScorecardScores}
+                  isScorekeeper={memberAssignment.isScorekeeper}
+                />
+                <GroupSignatureBoard
+                  outingId={outing.id}
+                  isScorekeeper={memberAssignment.isScorekeeper}
+                  isSubmitted={isVisibleGroupSubmitted}
+                  players={visiblePlayers.map((player) => {
+                    const signature =
+                      visibleSignatures.find((entry) => entry.memberId === player.memberId) ?? null;
+
+                    return {
+                      memberId: player.memberId,
+                      name: player.member.name,
+                      signatureData: signature?.signatureData ?? null,
+                      signedAt: signature?.signedAt.toISOString() ?? null,
+                    };
+                  })}
+                />
+                <div className="mt-6 rounded-[1.5rem] bg-[var(--surface-strong)] px-4 py-4 text-sm text-slate-700">
+                  {allVisiblePlayersSigned
+                    ? "All players in this group have signed the scorecard."
+                    : `${visibleSignatures.length} of ${visiblePlayers.length} players have signed the scorecard.`}
+                </div>
+                {memberAssignment.isScorekeeper ? (
+                  <form action={submitGroupRound} className="mt-4">
+                    <input type="hidden" name="outingId" value={outing.id} />
+                    <button
+                      type="submit"
+                      disabled={!allVisiblePlayersSigned}
+                      className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] px-5 py-2.5 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface-strong)] disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Submit this group round
+                    </button>
+                  </form>
+                ) : null}
+              </>
+            )}
             {false ? (
             <div className="mt-6 grid gap-4 lg:grid-cols-2">
               {outing.course.holes.map((hole) => (
