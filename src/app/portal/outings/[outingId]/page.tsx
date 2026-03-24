@@ -25,6 +25,7 @@ type OutingPageData = {
   id: string;
   title: string;
   outingDate: Date;
+  status: "draft" | "live" | "completed" | "finalized";
   course: {
     id: string;
     name: string;
