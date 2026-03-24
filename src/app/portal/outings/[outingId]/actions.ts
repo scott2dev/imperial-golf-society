@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { Prisma } from "@prisma/client";
 import { getCurrentMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculateStablefordHoleScore } from "@/lib/scoring";
@@ -20,6 +19,21 @@ function getNumberValue(formData: FormData, key: string) {
 
   return value;
 }
+
+type AssignmentForMember = {
+  id: string;
+  groupNumber: number;
+  isScorekeeper: boolean;
+  outing: {
+    course: {
+      holes: Array<{
+        holeNumber: number;
+        par: number;
+        strokeIndex: number;
+      }>;
+    };
+  };
+} | null;
 
 async function getAssignmentForMember(outingId: string, memberId: string) {
   return prisma.outingPlayer.findUnique({
@@ -44,21 +58,7 @@ async function getAssignmentForMember(outingId: string, memberId: string) {
         },
       },
     },
-  }) as Promise<
-    Prisma.OutingPlayerGetPayload<{
-      include: {
-        outing: {
-          include: {
-            course: {
-              include: {
-                holes: true;
-              };
-            };
-          };
-        };
-      };
-    }> | null
-  >;
+  }) as Promise<AssignmentForMember>;
 }
 
 async function getGroupPlayersForAssignment(outingId: string, groupNumber: number) {
