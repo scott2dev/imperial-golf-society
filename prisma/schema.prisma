@@ -82,6 +82,7 @@ model Outing {
   sponsorUrl    String?
   featured      Boolean        @default(false)
   status        OutingStatus   @default(draft)
+  resultsPublishedAt DateTime?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   course        Course         @relation(fields: [courseId], references: [id], onDelete: Restrict)
