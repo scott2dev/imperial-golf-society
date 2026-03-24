@@ -107,7 +107,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
   const member = await getCurrentMember();
   const { outingId } = await params;
 
-  const outing: OutingPageData | null = await prisma.outing.findUnique({
+  const outingResult: OutingPageData | null = await prisma.outing.findUnique({
     where: {
       id: outingId,
     },
@@ -138,9 +138,11 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
     },
   });
 
-  if (!outing) {
+  if (!outingResult) {
     notFound();
   }
+
+  const outing = outingResult;
 
   const isCaptainOrAdmin = member.role === "captain" || member.role === "admin";
   const memberAssignment = outing.players.find((player) => player.memberId === member.id);
