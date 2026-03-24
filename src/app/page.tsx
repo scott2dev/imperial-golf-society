@@ -40,7 +40,7 @@ export default function HomePage() {
             </h1>
             <p className="mt-4 max-w-xl text-sm leading-7 text-stone-100/85 sm:text-base">
               Based out of Imperial Bar in Bangor, with Sunday golf, prizes,
-              and Captain's Weekend in September.
+              and Captain&apos;s Weekend in September.
             </p>
           </div>
         </div>
