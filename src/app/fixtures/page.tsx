@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { Prisma } from "@prisma/client";
 import Image from "next/image";
 import FixtureImageLink from "@/components/FixtureImageLink";
 import { fixtures as fixturePresentation } from "@/lib/fixtures-data";
@@ -37,7 +38,13 @@ function formatFixtureDate(date: Date) {
 }
 
 export default async function FixturesPage() {
-  const outings = await prisma.outing.findMany({
+  const outings: Array<
+    Prisma.OutingGetPayload<{
+      include: {
+        course: true;
+      };
+    }>
+  > = await prisma.outing.findMany({
     orderBy: { outingDate: "asc" },
     include: {
       course: true,
