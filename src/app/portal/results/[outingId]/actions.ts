@@ -67,4 +67,36 @@ export async function publishOutingResults(formData: FormData) {
   revalidatePath("/portal");
   revalidatePath(`/portal/outings/${outingId}`);
   revalidatePath(`/portal/results/${outingId}`);
+  revalidatePath("/results");
+  revalidatePath(`/results/${outingId}`);
+}
+
+export async function unpublishOutingResults(formData: FormData) {
+  const member = await getCurrentMember();
+  const outingId = getTrimmedString(formData, "outingId");
+
+  if (!outingId) {
+    throw new Error("Outing id is required.");
+  }
+
+  if (member.role !== "captain" && member.role !== "admin") {
+    throw new Error("Only a captain or admin can unpublish results.");
+  }
+
+  assertConfirmationPhrase(formData, "UNPUBLISH");
+
+  await prisma.outing.update({
+    where: {
+      id: outingId,
+    },
+    data: {
+      resultsPublishedAt: null,
+    },
+  });
+
+  revalidatePath("/portal");
+  revalidatePath(`/portal/outings/${outingId}`);
+  revalidatePath(`/portal/results/${outingId}`);
+  revalidatePath("/results");
+  revalidatePath(`/results/${outingId}`);
 }
