@@ -183,7 +183,7 @@ export default async function PortalPage() {
                       <>
                         <p className="mt-2 text-sm text-slate-700">
                           Group {assignment.groupNumber}
-                          {assignment.isScorekeeper ? " • You are the scorekeeper" : ""}
+                          {assignment.isScorekeeper ? " â€¢ You are the scorekeeper" : ""}
                         </p>
                         <Link
                           href={`/portal/outings/${outing.id}`}
