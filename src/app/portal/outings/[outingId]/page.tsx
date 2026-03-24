@@ -209,21 +209,43 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
   const isSubmissionLocked = canShowCaptainResults;
   const frontNine = [1, 2, 3, 4, 5, 6, 7, 8, 9];
   const backNine = [10, 11, 12, 13, 14, 15, 16, 17, 18];
-  const stablefordPrizeWinners = outing.outingResults.slice(0, 3);
-  const podiumIds = new Set(stablefordPrizeWinners.map((result) => result.memberId));
-  const playerPrizeSummaries = outing.players.map((player) => {
-    const playerScores = scoresByPlayer.get(player.memberId) ?? [];
+  const eligiblePlayersForResults = canShowCaptainResults
+    ? outing.players.filter((player) => allGroupsSubmitted || player.submittedAt !== null)
+    : [];
+  const leaderboardResults = eligiblePlayersForResults
+    .map((player) => {
+      const playerScores = scoresByPlayer.get(player.memberId) ?? [];
 
-    return {
-      player,
-      totalPoints: calculateStablefordTotal(playerScores),
-      totalGross: playerScores.reduce((total, score) => total + score.grossStrokes, 0),
-      twosCount: playerScores.filter((score) => score.grossStrokes === 2).length,
-    };
-  });
+      return {
+        memberId: player.memberId,
+        member: player.member,
+        player,
+        totalPoints: calculateStablefordTotal(playerScores),
+        totalGross: playerScores.reduce((total, score) => total + score.grossStrokes, 0),
+        twosCount: playerScores.filter((score) => score.grossStrokes === 2).length,
+      };
+    })
+    .sort(
+      (left, right) =>
+        right.totalPoints - left.totalPoints ||
+        left.totalGross - right.totalGross ||
+        left.member.name.localeCompare(right.member.name),
+    )
+    .map((entry, index) => ({
+      ...entry,
+      position: index + 1,
+    }));
+  const stablefordPrizeWinners = leaderboardResults.slice(0, 3);
+  const podiumIds = new Set(stablefordPrizeWinners.map((result) => result.memberId));
+  const playerPrizeSummaries = leaderboardResults.map((result) => ({
+    player: result.player,
+    totalPoints: result.totalPoints,
+    totalGross: result.totalGross,
+    twosCount: result.twosCount,
+  }));
 
   const grossWinner =
-    allGroupsSubmitted
+    canShowCaptainResults
       ? [...playerPrizeSummaries].sort(
           (left, right) =>
             left.totalGross - right.totalGross ||
@@ -233,13 +255,13 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
       : null;
 
   const twosMoneyWinners =
-    allGroupsSubmitted
+    canShowCaptainResults
       ? playerPrizeSummaries
           .filter((summary) => summary.twosCount > 0)
           .sort((left, right) => left.player.member.name.localeCompare(right.player.member.name))
       : [];
   const numptyWinner =
-    allGroupsSubmitted
+    canShowCaptainResults
       ? [...playerPrizeSummaries].sort(
           (left, right) =>
             left.totalPoints - right.totalPoints ||
@@ -250,7 +272,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
 
   function getNineHoleWinner(holeNumbers: number[], excludedMemberIds = new Set<string>()) {
     return (
-      outing.players
+      eligiblePlayersForResults
         .filter(
           (player) =>
             !podiumIds.has(player.memberId) && !excludedMemberIds.has(player.memberId),
@@ -273,8 +295,8 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
     );
   }
 
-  const frontNineWinner = allGroupsSubmitted ? getNineHoleWinner(frontNine) : null;
-  const backNineWinner = allGroupsSubmitted
+  const frontNineWinner = canShowCaptainResults ? getNineHoleWinner(frontNine) : null;
+  const backNineWinner = canShowCaptainResults
     ? getNineHoleWinner(
         backNine,
         new Set(frontNineWinner ? [frontNineWinner.player.memberId] : []),
@@ -775,7 +797,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
               <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-8">
                 {stablefordPrizeWinners.map((result, index) => (
                   <article
-                    key={`stableford-${result.id}`}
+                    key={`stableford-${result.memberId}`}
                     className="rounded-[1.5rem] bg-[var(--surface-strong)] px-4 py-4"
                   >
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand)]">
@@ -872,12 +894,12 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                 Captain leaderboard
               </h2>
               <div className="mt-6 grid gap-3">
-                {outing.outingResults.length === 0 ? (
+                {leaderboardResults.length === 0 ? (
                   <p className="rounded-[1.5rem] bg-[var(--surface-strong)] px-4 py-4 text-sm text-slate-700">
                     No results are available yet.
                   </p>
                 ) : (
-                  outing.outingResults.map((result) => {
+                  leaderboardResults.map((result) => {
                     const player = outingPlayersByMember.get(result.memberId) ?? null;
                     const playerScores = (scoresByPlayer.get(result.memberId) ?? []).sort(
                       (left, right) => left.holeNumber - right.holeNumber,
@@ -886,7 +908,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
 
                     return (
                       <details
-                        key={result.id}
+                        key={result.memberId}
                         className="rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-4"
                       >
                         <summary className="cursor-pointer list-none">
