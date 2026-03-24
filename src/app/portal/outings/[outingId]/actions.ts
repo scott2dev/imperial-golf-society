@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type { Prisma } from "@prisma/client";
 import { getCurrentMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculateStablefordHoleScore } from "@/lib/scoring";
@@ -43,7 +44,21 @@ async function getAssignmentForMember(outingId: string, memberId: string) {
         },
       },
     },
-  });
+  }) as Promise<
+    Prisma.OutingPlayerGetPayload<{
+      include: {
+        outing: {
+          include: {
+            course: {
+              include: {
+                holes: true;
+              };
+            };
+          };
+        };
+      };
+    }> | null
+  >;
 }
 
 async function getGroupPlayersForAssignment(outingId: string, groupNumber: number) {
