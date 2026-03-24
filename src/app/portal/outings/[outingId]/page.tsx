@@ -10,7 +10,6 @@ import { calculateStablefordTotal } from "@/lib/scoring";
 import {
   claimGroupScorekeeper,
   removeGroupSubmission,
-  saveHoleScores,
   submitGroupRound,
 } from "./actions";
 
@@ -531,7 +530,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
               {outing.course.holes.map((hole) => (
                 <form
                   key={hole.id}
-                  action={saveHoleScores}
+                  action="#"
                   className="grid gap-4 rounded-[1.25rem] border border-[var(--border)] bg-[var(--surface-strong)] p-4"
                 >
                     <div className="flex flex-wrap items-start justify-between gap-4">
