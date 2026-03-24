@@ -593,7 +593,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                         </tbody>
                       </table>
                     </div>
-                    {memberAssignment.isScorekeeper ? (
+                    {false ? (
                       <div className="flex flex-wrap gap-3">
                         <button
                           type="submit"
