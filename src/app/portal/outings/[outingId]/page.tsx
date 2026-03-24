@@ -578,7 +578,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                                   <ScoreInput
                                     name={`gross-${player.memberId}`}
                                     defaultValue={existingScore?.grossStrokes ?? ""}
-                                    disabled={!memberAssignment.isScorekeeper}
+                                    disabled
                                   />
                                 </td>
                                 <td className="px-3 py-2 text-sm text-slate-600">
