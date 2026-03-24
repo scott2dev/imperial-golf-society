@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 type ScoreInputProps = {
-  defaultValue?: number | null;
+  defaultValue?: number | string | null;
   disabled?: boolean;
   name: string;
 };
