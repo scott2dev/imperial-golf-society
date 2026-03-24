@@ -68,7 +68,7 @@ function mapMemberRecord(record: {
   role: string;
   approvalStatus: string;
   isRegistered: boolean;
-  handicapIndex: number;
+  handicapIndex: number | { toString(): string };
   createdAt: Date;
   updatedAt: Date;
   lastLoginAt: Date;
