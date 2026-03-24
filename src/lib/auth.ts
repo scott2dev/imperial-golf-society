@@ -19,16 +19,17 @@ export async function requireSession() {
 
 export async function getCurrentMember() {
   const session = await requireSession();
+  const user = session?.user;
 
-  if (session.user.needsProfileLink || !session.user.memberId) {
+  if (!user || user.needsProfileLink || !user.memberId) {
     redirect("/portal/onboarding");
   }
 
-  if (session.user.approvalStatus === "pending") {
+  if (user.approvalStatus === "pending") {
     redirect("/portal/pending");
   }
 
-  const member = await getMemberRecordById(session.user.memberId);
+  const member = await getMemberRecordById(user.memberId);
 
   if (!member) {
     redirect("/portal/onboarding");
