@@ -677,7 +677,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                 : "The captain results are ready to review on the dedicated results page."}
             </p>
             <Link
-              href={`/portal/results/${outing.id}`}
+              href={outing.resultsPublishedAt ? `/results/${outing.id}` : `/portal/results/${outing.id}`}
               className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] px-5 py-2.5 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface-strong)]"
             >
               Open results page
