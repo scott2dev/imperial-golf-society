@@ -163,6 +163,9 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
   const signaturesByMember = new Map(
     outing.signatures.map((signature) => [signature.memberId, signature]),
   );
+  const outingPlayersByMember = new Map(
+    outing.players.map((player) => [player.memberId, player]),
+  );
   const scoresByMember = new Map(
     outing.holeScores.map((score) => [`${score.memberId}-${score.holeNumber}`, score]),
   );
@@ -738,134 +741,106 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                     No results are available yet.
                   </p>
                 ) : (
-                  outing.outingResults.map((result) => (
-                    <article
-                      key={result.id}
-                      className="rounded-[1.5rem] bg-[var(--surface-strong)] px-4 py-4"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-start gap-4">
-                          <div>
-                            {signaturesByMember.get(result.memberId)?.signatureData ? (
-                              <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[#faf7f1]">
-                                <img
-                                  src={signaturesByMember.get(result.memberId)?.signatureData}
-                                  alt={`${result.member.name} signature`}
-                                  className="h-12 w-24 object-contain"
-                                />
+                  outing.outingResults.map((result) => {
+                    const player = outingPlayersByMember.get(result.memberId) ?? null;
+                    const playerScores = (scoresByPlayer.get(result.memberId) ?? []).sort(
+                      (left, right) => left.holeNumber - right.holeNumber,
+                    );
+                    const signature = signaturesByMember.get(result.memberId) ?? null;
+
+                    return (
+                      <details
+                        key={result.id}
+                        className="rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-4"
+                      >
+                        <summary className="cursor-pointer list-none">
+                          <div className="flex flex-wrap items-start justify-between gap-4">
+                            <div className="flex items-start gap-4">
+                              <div>
+                                {signature?.signatureData ? (
+                                  <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[#faf7f1]">
+                                    <img
+                                      src={signature.signatureData}
+                                      alt={`${result.member.name} signature`}
+                                      className="h-12 w-24 object-contain"
+                                    />
+                                  </div>
+                                ) : (
+                                  <div className="inline-flex h-12 w-24 items-center justify-center rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)] text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                    Unsigned
+                                  </div>
+                                )}
                               </div>
-                            ) : (
-                              <div className="inline-flex h-12 w-24 items-center justify-center rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)] text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                Unsigned
+                              <div>
+                                <p className="font-semibold text-[var(--brand-dark)]">
+                                  {result.position ? `${result.position}. ` : ""}
+                                  {result.member.name}
+                                </p>
+                                <p className="mt-1 text-sm text-slate-600">
+                                  Group {player?.groupNumber ?? "?"} • Handicap{" "}
+                                  {Number(
+                                    player?.playingHandicap ?? result.member.handicapIndex,
+                                  ).toFixed(1)}
+                                </p>
                               </div>
-                            )}
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-semibold text-[var(--brand-dark)]">
+                                {result.totalPoints} pts
+                              </p>
+                              <p className="mt-1 text-xs uppercase tracking-[0.16em] text-slate-500">
+                                Click to view shots
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-semibold text-[var(--brand-dark)]">
-                              {result.position ? `${result.position}. ` : ""}
-                              {result.member.name}
-                            </p>
-                            <p className="mt-1 text-sm text-slate-600">
-                              Handicap {Number(result.member.handicapIndex).toFixed(1)}
-                            </p>
-                          </div>
+                        </summary>
+                        <div className="mt-4 overflow-x-auto rounded-[1rem] border border-[var(--border)] bg-white">
+                          <table className="min-w-full border-collapse text-left text-sm">
+                            <thead className="bg-[var(--surface)] text-[var(--brand-dark)]">
+                              <tr>
+                                <th className="px-3 py-2 font-semibold">Hole</th>
+                                <th className="px-3 py-2 font-semibold">Gross</th>
+                                <th className="px-3 py-2 font-semibold">Net</th>
+                                <th className="px-3 py-2 font-semibold">Pts</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {outing.course.holes.map((hole) => {
+                                const score =
+                                  playerScores.find((entry) => entry.holeNumber === hole.holeNumber) ??
+                                  null;
+
+                                return (
+                                  <tr
+                                    key={`${result.memberId}-${hole.holeNumber}`}
+                                    className="border-t border-[var(--border)]"
+                                  >
+                                    <td className="px-3 py-2 font-semibold text-[var(--brand-dark)]">
+                                      {hole.holeNumber}
+                                    </td>
+                                    <td className="px-3 py-2 text-slate-700">
+                                      {score?.grossStrokes ?? "—"}
+                                    </td>
+                                    <td className="px-3 py-2 text-slate-700">
+                                      {score?.netStrokes ?? "—"}
+                                    </td>
+                                    <td className="px-3 py-2 font-semibold text-[var(--brand-dark)]">
+                                      {score?.stablefordPoints ?? "—"}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
                         </div>
-                        <p className="text-sm font-semibold text-[var(--brand-dark)]">
-                          {result.totalPoints} pts
-                        </p>
-                      </div>
-                    </article>
-                  ))
+                      </details>
+                    );
+                  })
                 )}
               </div>
             </div>
           </section>
 
-          <section className="mx-auto mt-6 max-w-6xl px-4 sm:px-6">
-            <div className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
-              <div className="flex flex-wrap items-center gap-3">
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand)]">
-                  Shot Breakdown
-                </p>
-                <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-800">
-                  Visible to captain only
-                </span>
-              </div>
-              <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)]">
-                Hole-by-hole player shots
-              </h2>
-              <div className="mt-6 grid gap-4">
-                {outing.players.map((player) => {
-                  const playerScores = (scoresByPlayer.get(player.memberId) ?? []).sort(
-                    (left, right) => left.holeNumber - right.holeNumber,
-                  );
-
-                  return (
-                    <details
-                      key={`shots-${player.memberId}`}
-                      className="rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface-strong)] px-4 py-4"
-                    >
-                      <summary className="cursor-pointer list-none">
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <p className="font-semibold text-[var(--brand-dark)]">
-                              {player.member.name}
-                            </p>
-                            <p className="mt-1 text-sm text-slate-600">
-                              Group {player.groupNumber} • Handicap{" "}
-                              {Number(player.playingHandicap).toFixed(1)}
-                            </p>
-                          </div>
-                          <p className="text-sm font-semibold text-[var(--brand-dark)]">
-                            {calculateStablefordTotal(playerScores)} pts
-                          </p>
-                        </div>
-                      </summary>
-                      <div className="mt-4 overflow-x-auto rounded-[1rem] border border-[var(--border)] bg-white">
-                        <table className="min-w-full border-collapse text-left text-sm">
-                          <thead className="bg-[var(--surface)] text-[var(--brand-dark)]">
-                            <tr>
-                              <th className="px-3 py-2 font-semibold">Hole</th>
-                              <th className="px-3 py-2 font-semibold">Gross</th>
-                              <th className="px-3 py-2 font-semibold">Net</th>
-                              <th className="px-3 py-2 font-semibold">Pts</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {outing.course.holes.map((hole) => {
-                              const score =
-                                playerScores.find((entry) => entry.holeNumber === hole.holeNumber) ??
-                                null;
-
-                              return (
-                                <tr
-                                  key={`${player.memberId}-${hole.holeNumber}`}
-                                  className="border-t border-[var(--border)]"
-                                >
-                                  <td className="px-3 py-2 font-semibold text-[var(--brand-dark)]">
-                                    {hole.holeNumber}
-                                  </td>
-                                  <td className="px-3 py-2 text-slate-700">
-                                    {score?.grossStrokes ?? "—"}
-                                  </td>
-                                  <td className="px-3 py-2 text-slate-700">
-                                    {score?.netStrokes ?? "—"}
-                                  </td>
-                                  <td className="px-3 py-2 font-semibold text-[var(--brand-dark)]">
-                                    {score?.stablefordPoints ?? "—"}
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    </details>
-                  );
-                })}
-              </div>
-            </div>
-          </section>
         </>
       ) : null}
     </main>

@@ -26,19 +26,17 @@ export function GroupSignatureBoard({
   const canvasContainerRef = useRef<HTMLDivElement | null>(null);
   const isDrawingRef = useRef(false);
   const [selectedMemberId, setSelectedMemberId] = useState(players[0]?.memberId ?? "");
-  const [signatures, setSignatures] = useState<Record<string, PlayerSignature>>(() =>
-    Object.fromEntries(players.map((player) => [player.memberId, player])),
-  );
+  const [signatureOverrides, setSignatureOverrides] = useState<Record<string, PlayerSignature>>({});
   const [saveError, setSaveError] = useState<string | null>(null);
   const [hasInk, setHasInk] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
-    setSignatures(Object.fromEntries(players.map((player) => [player.memberId, player])));
-    setSelectedMemberId((current) =>
-      players.some((player) => player.memberId === current) ? current : (players[0]?.memberId ?? ""),
-    );
-  }, [players]);
+  const signatures = Object.fromEntries(
+    players.map((player) => [player.memberId, signatureOverrides[player.memberId] ?? player]),
+  );
+  const resolvedSelectedMemberId = players.some((player) => player.memberId === selectedMemberId)
+    ? selectedMemberId
+    : (players[0]?.memberId ?? "");
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -70,11 +68,11 @@ export function GroupSignatureBoard({
     context.fillStyle = "#faf7f1";
     context.clearRect(0, 0, width, height);
     context.fillRect(0, 0, width, height);
-    setHasInk(false);
-  }, [selectedMemberId]);
+  }, [resolvedSelectedMemberId]);
 
-  const selectedPlayer = signatures[selectedMemberId] ?? null;
+  const selectedPlayer = signatures[resolvedSelectedMemberId] ?? null;
   const signedCount = Object.values(signatures).filter((player) => Boolean(player.signatureData)).length;
+  const allPlayersSigned = players.length > 0 && signedCount === players.length;
 
   function getPoint(event: ReactPointerEvent<HTMLCanvasElement>) {
     const canvas = canvasRef.current;
@@ -172,10 +170,10 @@ export function GroupSignatureBoard({
         formData.set("memberId", selectedPlayer.memberId);
         formData.set("signatureData", signatureData);
         await saveGroupSignature(formData);
-        setSignatures((current) => ({
+        setSignatureOverrides((current) => ({
           ...current,
           [selectedPlayer.memberId]: {
-            ...current[selectedPlayer.memberId],
+            ...(current[selectedPlayer.memberId] ?? selectedPlayer),
             signatureData,
             signedAt: new Date().toISOString(),
           },
@@ -217,7 +215,10 @@ export function GroupSignatureBoard({
             </div>
             <button
               type="button"
-              onClick={() => setSelectedMemberId(player.memberId)}
+              onClick={() => {
+                setSelectedMemberId(player.memberId);
+                setHasInk(false);
+              }}
               className="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface)]"
             >
               {signatures[player.memberId]?.signatureData ? "Replace signature" : "Collect signature"}
@@ -226,7 +227,11 @@ export function GroupSignatureBoard({
         ))}
       </div>
 
-      {selectedPlayer ? (
+      {allPlayersSigned ? (
+        <div className="mt-6 rounded-[1.5rem] border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-800">
+          All players in this group have now signed the scorecard.
+        </div>
+      ) : selectedPlayer ? (
         <div className="mt-6 rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface-strong)] p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
