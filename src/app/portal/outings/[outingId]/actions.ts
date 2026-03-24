@@ -56,6 +56,22 @@ type GroupPlayerAssignment = Array<{
   };
 }>;
 
+type SubmitGroupPlayer = {
+  id: string;
+  memberId: string;
+};
+
+type ScoreCountEntry = {
+  memberId: string;
+  _count: {
+    holeNumber: number;
+  };
+};
+
+type SignatureEntry = {
+  memberId: string;
+};
+
 async function getAssignmentForMember(outingId: string, memberId: string) {
   return prisma.outingPlayer.findUnique({
     where: {
@@ -362,7 +378,7 @@ export async function submitGroupRound(formData: FormData) {
     throw new Error("Only the current scorekeeper can submit the group round.");
   }
 
-  const groupPlayers = await prisma.outingPlayer.findMany({
+  const groupPlayers: SubmitGroupPlayer[] = await prisma.outingPlayer.findMany({
     where: {
       outingId,
       groupNumber: assignment.groupNumber,
@@ -373,7 +389,7 @@ export async function submitGroupRound(formData: FormData) {
     },
   });
 
-  const scoreCounts = await prisma.holeScore.groupBy({
+  const scoreCounts: ScoreCountEntry[] = await prisma.holeScore.groupBy({
     by: ["memberId"],
     where: {
       outingId,
@@ -396,7 +412,7 @@ export async function submitGroupRound(formData: FormData) {
     }
   }
 
-  const signatures = await prisma.outingSignature.findMany({
+  const signatures: SignatureEntry[] = await prisma.outingSignature.findMany({
     where: {
       outingId,
       groupNumber: assignment.groupNumber,
