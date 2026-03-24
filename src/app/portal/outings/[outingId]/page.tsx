@@ -10,6 +10,7 @@ import { prisma } from "@/lib/prisma";
 import { calculateStablefordTotal } from "@/lib/scoring";
 import {
   claimGroupScorekeeper,
+  finalizeOutingSubmissions,
   removeGroupSubmission,
   submitGroupRound,
 } from "./actions";
@@ -145,6 +146,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
   const outing = outingResult;
 
   const isCaptainOrAdmin = member.role === "captain" || member.role === "admin";
+  const isAdmin = member.role === "admin";
   const memberAssignment = outing.players.find((player) => player.memberId === member.id);
 
   if (!memberAssignment && !isCaptainOrAdmin) {
@@ -200,6 +202,9 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
     : false;
   const allGroupsSubmitted =
     outing.players.length > 0 && outing.players.every((player) => player.submittedAt !== null);
+  const isFinalizedByAdmin = outing.status === "finalized";
+  const canShowCaptainResults = allGroupsSubmitted || isFinalizedByAdmin;
+  const isSubmissionLocked = canShowCaptainResults;
   const frontNine = [1, 2, 3, 4, 5, 6, 7, 8, 9];
   const backNine = [10, 11, 12, 13, 14, 15, 16, 17, 18];
   const stablefordPrizeWinners = outing.outingResults.slice(0, 3);
@@ -355,7 +360,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                 </p>
 
                 <div className="mt-4 flex flex-wrap gap-3">
-                  {!memberAssignment.isScorekeeper ? (
+                  {!memberAssignment.isScorekeeper && !isSubmissionLocked ? (
                     <form action={claimGroupScorekeeper}>
                       <input type="hidden" name="outingId" value={outing.id} />
                       <button
@@ -374,6 +379,10 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                   {submittedGroups.has(memberAssignment.groupNumber) ? (
                     <span className="inline-flex min-h-11 items-center justify-center rounded-full border border-sky-200 bg-sky-50 px-5 py-2.5 text-sm font-semibold text-sky-800">
                       This group has submitted its round
+                    </span>
+                  ) : isFinalizedByAdmin ? (
+                    <span className="inline-flex min-h-11 items-center justify-center rounded-full border border-amber-200 bg-amber-50 px-5 py-2.5 text-sm font-semibold text-amber-800">
+                      Submission has been finalized by admin
                     </span>
                   ) : null}
                 </div>
@@ -407,7 +416,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                       </article>
                     ))}
                 </div>
-                {!isVisibleGroupSubmitted ? (
+                {!isSubmissionLocked ? (
                   <a
                     href="#group-scorecards"
                     className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] px-5 py-2.5 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface-strong)]"
@@ -444,9 +453,17 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                         {submittedGroups.has(groupNumber) ? "Submitted" : "Still in progress"}
                       </span>
                       {isCaptainOrAdmin && submittedGroups.has(groupNumber) ? (
-                        <form action={removeGroupSubmission}>
+                        <form action={removeGroupSubmission} className="flex flex-wrap items-end gap-2">
                           <input type="hidden" name="outingId" value={outing.id} />
                           <input type="hidden" name="groupNumber" value={groupNumber} />
+                          <label className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                            Type REMOVE
+                            <input
+                              name="confirmation"
+                              placeholder="REMOVE"
+                              className="mt-1 w-24 rounded-xl border border-rose-200 bg-white px-2.5 py-1.5 text-[11px] uppercase text-slate-900 outline-none transition focus:border-rose-400"
+                            />
+                          </label>
                           <button
                             type="submit"
                             className="inline-flex min-h-9 items-center justify-center rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-rose-800 transition hover:bg-rose-100"
@@ -465,8 +482,38 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
               <div className="mt-6 rounded-[1.5rem] bg-[var(--surface-strong)] px-4 py-4 text-sm text-slate-700">
                 {allGroupsSubmitted
                   ? "All groups have submitted. Full results and prizes are now visible below."
-                  : "Full leaderboard and prize summary unlock for captain/admin when every group has submitted."}
+                  : isFinalizedByAdmin
+                    ? "An admin has finalized submissions. Full results and prizes are now visible below."
+                    : "Full leaderboard and prize summary unlock for captain/admin when every group has submitted, or when an admin finalizes the outing."}
               </div>
+            ) : null}
+            {isAdmin && !canShowCaptainResults ? (
+              <form
+                action={finalizeOutingSubmissions}
+                className="mt-4 rounded-[1.5rem] border border-amber-200 bg-amber-50 px-4 py-4"
+              >
+                <input type="hidden" name="outingId" value={outing.id} />
+                <p className="text-sm font-semibold text-amber-900">Finalize submissions</p>
+                <p className="mt-1 text-sm text-amber-800">
+                  Use this only if a group cannot submit. This will unlock the captain results using the scores currently saved.
+                </p>
+                <div className="mt-3 flex flex-wrap items-end gap-3">
+                  <label className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-900">
+                    Type FINALIZE
+                    <input
+                      name="confirmation"
+                      placeholder="FINALIZE"
+                      className="mt-2 w-32 rounded-xl border border-amber-300 bg-white px-3 py-2 text-sm uppercase text-slate-900 outline-none transition focus:border-amber-500"
+                    />
+                  </label>
+                  <button
+                    type="submit"
+                    className="inline-flex min-h-10 items-center justify-center rounded-full border border-amber-300 bg-white px-4 py-2 text-sm font-semibold text-amber-900 transition hover:bg-amber-100"
+                  >
+                    Finalize submissions
+                  </button>
+                </div>
+              </form>
             ) : null}
           </aside>
         </div>
@@ -476,12 +523,12 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
         <section id="group-scorecards" className="mx-auto mt-6 max-w-6xl px-4 sm:px-6">
           <div className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand)]">
-              {isVisibleGroupSubmitted ? "Submitted Scorecards" : "Hole Entry"}
+              {isSubmissionLocked ? "Scorecards" : "Hole Entry"}
             </p>
             <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)]">
-              {isVisibleGroupSubmitted ? "Signed group scorecards" : "Hole-by-hole scoring"}
+              {isSubmissionLocked ? "Group scorecards" : "Hole-by-hole scoring"}
             </h2>
-            {isVisibleGroupSubmitted ? (
+            {isVisibleGroupSubmitted || isFinalizedByAdmin ? (
               <div className="mt-6 grid gap-4">
                 {visiblePlayers.map((player) => {
                   const signature =
@@ -599,11 +646,11 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                     name: player.member.name,
                   }))}
                   initialScoresByHole={visibleScorecardScores}
-                  isScorekeeper={memberAssignment.isScorekeeper}
+                  isScorekeeper={memberAssignment.isScorekeeper && !isSubmissionLocked}
                 />
                 <GroupSignatureBoard
                   outingId={outing.id}
-                  isScorekeeper={memberAssignment.isScorekeeper}
+                  isScorekeeper={memberAssignment.isScorekeeper && !isSubmissionLocked}
                   isSubmitted={isVisibleGroupSubmitted}
                   players={visiblePlayers.map((player) => {
                     const signature =
@@ -622,7 +669,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                     ? "All players in this group have signed the scorecard."
                     : `${visibleSignatures.length} of ${visiblePlayers.length} players have signed the scorecard.`}
                 </div>
-                {memberAssignment.isScorekeeper ? (
+                {memberAssignment.isScorekeeper && !isSubmissionLocked ? (
                   <form action={submitGroupRound} className="mt-4">
                     <input type="hidden" name="outingId" value={outing.id} />
                     <button
@@ -726,7 +773,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
         </section>
       ) : null}
 
-      {isCaptainOrAdmin && allGroupsSubmitted ? (
+      {isCaptainOrAdmin && canShowCaptainResults ? (
         <>
           <section className="mx-auto mt-6 max-w-6xl px-4 sm:px-6">
             <div className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">

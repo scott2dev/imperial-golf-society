@@ -9,6 +9,14 @@ function getTrimmedString(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
 }
 
+function assertConfirmationPhrase(formData: FormData, expected: string) {
+  const confirmation = getTrimmedString(formData, "confirmation").toUpperCase();
+
+  if (confirmation !== expected) {
+    throw new Error(`Please type ${expected} to confirm this action.`);
+  }
+}
+
 function getNumberValue(formData: FormData, key: string) {
   const raw = String(formData.get(key) ?? "").trim();
   const value = Number(raw);
@@ -481,6 +489,8 @@ export async function removeGroupSubmission(formData: FormData) {
     throw new Error("Only a captain or admin can remove a submitted group round.");
   }
 
+  assertConfirmationPhrase(formData, "REMOVE");
+
   await prisma.outingPlayer.updateMany({
     where: {
       outingId,
@@ -497,6 +507,35 @@ export async function removeGroupSubmission(formData: FormData) {
     },
     data: {
       status: "live",
+    },
+  });
+
+  revalidatePath("/portal");
+  revalidatePath(`/portal/outings/${outingId}`);
+}
+
+export async function finalizeOutingSubmissions(formData: FormData) {
+  const member = await getCurrentMember();
+  const outingId = getTrimmedString(formData, "outingId");
+
+  if (!outingId) {
+    throw new Error("Outing id is required.");
+  }
+
+  if (member.role !== "admin") {
+    throw new Error("Only an admin can finalize submissions.");
+  }
+
+  assertConfirmationPhrase(formData, "FINALIZE");
+
+  await updateOutingResults(outingId);
+
+  await prisma.outing.update({
+    where: {
+      id: outingId,
+    },
+    data: {
+      status: "finalized",
     },
   });
 

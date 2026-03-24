@@ -297,6 +297,19 @@ export async function approveMember(memberId: string) {
   return mapMemberRecord(record);
 }
 
+export async function updateMemberHandicap(memberId: string, handicapIndex: number) {
+  const record = await prisma.member.update({
+    where: {
+      id: memberId,
+    },
+    data: {
+      handicapIndex,
+    },
+  });
+
+  return mapMemberRecord(record);
+}
+
 export async function removePendingMember(memberId: string) {
   const member = await prisma.member.findUnique({
     where: {
@@ -361,4 +374,118 @@ export async function updateMemberRole(memberId: string, role: MemberRole) {
   });
 
   return mapMemberRecord(record);
+}
+
+export async function reassignMemberEmailLink(sourceMemberId: string, targetMemberId: string) {
+  if (sourceMemberId === targetMemberId) {
+    throw new Error("Choose a different member to move this linked account to.");
+  }
+
+  const [sourceMember, targetMember] = await Promise.all([
+    prisma.member.findUnique({
+      where: {
+        id: sourceMemberId,
+      },
+    }),
+    prisma.member.findUnique({
+      where: {
+        id: targetMemberId,
+      },
+    }),
+  ]);
+
+  if (!sourceMember || !targetMember) {
+    throw new Error("One of the selected member records could not be found.");
+  }
+
+  if (!sourceMember.email) {
+    throw new Error("This member does not currently have a linked email to move.");
+  }
+
+  if (targetMember.email && targetMember.email !== sourceMember.email) {
+    throw new Error("The selected target member already has a different linked email.");
+  }
+
+  if (targetMember.approvalStatus !== "approved") {
+    throw new Error("Only approved members can receive a linked account.");
+  }
+
+  await prisma.$transaction([
+    prisma.member.update({
+      where: {
+        id: targetMember.id,
+      },
+      data: {
+        email: sourceMember.email,
+        image: sourceMember.image ?? targetMember.image,
+        isRegistered: true,
+        lastLoginAt: sourceMember.lastLoginAt,
+      },
+    }),
+    prisma.member.update({
+      where: {
+        id: sourceMember.id,
+      },
+      data: {
+        email: null,
+        image: null,
+        isRegistered: false,
+      },
+    }),
+  ]);
+}
+
+export async function deleteMember(memberId: string) {
+  const member = await prisma.member.findUnique({
+    where: {
+      id: memberId,
+    },
+    include: {
+      outingPlayers: {
+        select: {
+          id: true,
+        },
+      },
+      holeScores: {
+        select: {
+          id: true,
+        },
+      },
+      enteredScores: {
+        select: {
+          id: true,
+        },
+      },
+      outingResults: {
+        select: {
+          id: true,
+        },
+      },
+      outingSignatures: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+  if (!member) {
+    throw new Error("The member could not be found.");
+  }
+
+  if (
+    member.outingPlayers.length > 0 ||
+    member.holeScores.length > 0 ||
+    member.enteredScores.length > 0 ||
+    member.outingResults.length > 0 ||
+    member.outingSignatures.length > 0
+  ) {
+    throw new Error("This member already has outing or scoring history and cannot be deleted.");
+  }
+
+  await prisma.member.delete({
+    where: {
+      id: memberId,
+    },
+  });
 }

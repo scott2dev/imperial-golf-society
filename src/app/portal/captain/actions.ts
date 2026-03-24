@@ -7,7 +7,10 @@ import { createPlaceholderHoleSetup } from "@/lib/course-defaults";
 import { fixtures } from "@/lib/fixtures-data";
 import {
   approveMember,
+  deleteMember as deleteStoredMember,
   removePendingMember,
+  reassignMemberEmailLink as reassignStoredMemberEmailLink,
+  updateMemberHandicap as updateStoredMemberHandicap,
   updateMemberRole as updateStoredMemberRole,
 } from "@/lib/member-store";
 import { members as sourceMembers } from "@/lib/members-data";
@@ -15,6 +18,14 @@ import { prisma } from "@/lib/prisma";
 
 function getTrimmedString(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
+}
+
+function assertConfirmationPhrase(formData: FormData, expected: string) {
+  const confirmation = getTrimmedString(formData, "confirmation").toUpperCase();
+
+  if (confirmation !== expected) {
+    throw new Error(`Please type ${expected} to confirm this action.`);
+  }
 }
 
 function getNumberValue(formData: FormData, key: string) {
@@ -73,6 +84,8 @@ export async function deleteCourse(formData: FormData) {
   if (!courseId) {
     throw new Error("Course id is required.");
   }
+
+  assertConfirmationPhrase(formData, "DELETE");
 
   const outingCount = await prisma.outing.count({
     where: {
@@ -395,6 +408,8 @@ export async function removeMemberRequest(formData: FormData) {
     throw new Error("Member id is required.");
   }
 
+  assertConfirmationPhrase(formData, "REMOVE");
+
   await removePendingMember(memberId);
 
   revalidatePath("/portal");
@@ -416,6 +431,72 @@ export async function updateMemberRole(formData: FormData) {
   }
 
   await updateStoredMemberRole(memberId, role);
+
+  revalidatePath("/portal");
+  revalidatePath("/portal/captain");
+}
+
+export async function updateMemberHandicap(formData: FormData) {
+  await requireAdmin();
+
+  const memberId = getTrimmedString(formData, "memberId");
+  const handicapIndex = getNumberValue(formData, "handicapIndex");
+
+  if (!memberId) {
+    throw new Error("Member id is required.");
+  }
+
+  if (handicapIndex < 0 || handicapIndex > 54) {
+    throw new Error("Handicap index must be between 0 and 54.");
+  }
+
+  await updateStoredMemberHandicap(memberId, handicapIndex);
+
+  await prisma.outingPlayer.updateMany({
+    where: {
+      memberId,
+      submittedAt: null,
+    },
+    data: {
+      courseHandicap: handicapIndex,
+      playingHandicap: handicapIndex,
+    },
+  });
+
+  revalidatePath("/portal");
+  revalidatePath("/portal/captain");
+}
+
+export async function reassignMemberEmailLink(formData: FormData) {
+  await requireAdmin();
+
+  const sourceMemberId = getTrimmedString(formData, "sourceMemberId");
+  const targetMemberId = getTrimmedString(formData, "targetMemberId");
+
+  if (!sourceMemberId || !targetMemberId) {
+    throw new Error("Both the current member and target member are required.");
+  }
+
+  assertConfirmationPhrase(formData, "RELINK");
+
+  await reassignStoredMemberEmailLink(sourceMemberId, targetMemberId);
+
+  revalidatePath("/portal");
+  revalidatePath("/portal/captain");
+}
+
+export async function deleteMember(formData: FormData) {
+  await requireAdmin();
+
+  const memberId = getTrimmedString(formData, "memberId");
+
+  if (!memberId) {
+    throw new Error("Member id is required.");
+  }
+
+  assertConfirmationPhrase(formData, "DELETE");
+
+  await deleteStoredMember(memberId);
 
   revalidatePath("/portal");
   revalidatePath("/portal/captain");
@@ -475,6 +556,8 @@ export async function deleteOuting(formData: FormData) {
   if (!outingId) {
     throw new Error("Outing id is required.");
   }
+
+  assertConfirmationPhrase(formData, "DELETE");
 
   await prisma.outing.delete({
     where: {
