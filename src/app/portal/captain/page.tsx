@@ -29,10 +29,72 @@ type CaptainPageProps = {
   }>;
 };
 
+type CaptainCourse = {
+  id: string;
+  name: string;
+  websiteUrl: string | null;
+  mapsUrl: string | null;
+  imageSrc: string | null;
+  imageAlt: string | null;
+  holes: Array<{
+    id: string;
+    holeNumber: number;
+    par: number;
+    strokeIndex: number;
+  }>;
+};
+
+type CaptainMember = {
+  id: string;
+  name: string;
+  email: string | null;
+  role: "member" | "captain" | "admin";
+  isRegistered: boolean;
+  handicapIndex: number | { toString(): string } | null;
+};
+
+type CaptainOuting = {
+  id: string;
+  title: string;
+  outingDate: Date;
+  teeTime: string | null;
+  imageSrc: string | null;
+  imageAlt: string | null;
+  sponsorName: string | null;
+  sponsorUrl: string | null;
+  featured: boolean;
+  status: "draft" | "live" | "completed" | "finalized";
+  courseId: string;
+  course: {
+    id: string;
+    name: string;
+  };
+  players: Array<{
+    id: string;
+    memberId: string;
+    groupNumber: number;
+    isScorekeeper: boolean;
+    submittedAt: Date | null;
+    courseHandicap: number | { toString(): string } | null;
+    playingHandicap: number | { toString(): string } | null;
+    member: {
+      id: string;
+      name: string;
+      email: string | null;
+    };
+  }>;
+};
+
 export default async function CaptainPage({ searchParams }: CaptainPageProps) {
   const captain = await requireCaptain();
 
-  const [courses, members, outings, pendingMembers, params] = await Promise.all([
+  const [courses, members, outings, pendingMembers, params]: [
+    CaptainCourse[],
+    CaptainMember[],
+    CaptainOuting[],
+    CaptainMember[],
+    Awaited<CaptainPageProps["searchParams"]>,
+  ] = await Promise.all([
     prisma.course.findMany({
       orderBy: { name: "asc" },
       include: {
