@@ -11,7 +11,7 @@ type ConfirmActionModalProps = {
   buttonClassName: string;
   title: string;
   description: string;
-  confirmWord: string;
+  confirmWord?: string;
   confirmButtonLabel?: string;
   confirmButtonClassName?: string;
   hiddenFields?: Record<string, string | number>;
@@ -56,14 +56,16 @@ export function ConfirmActionModal({
 
               {children}
 
-              <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                Type {confirmWord}
-                <input
-                  name="confirmation"
-                  placeholder={confirmWord}
-                  className="mt-2 w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm uppercase text-slate-900 outline-none transition focus:border-[var(--brand)]"
-                />
-              </label>
+              {confirmWord ? (
+                <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  Type {confirmWord}
+                  <input
+                    name="confirmation"
+                    placeholder={confirmWord}
+                    className="mt-2 w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm uppercase text-slate-900 outline-none transition focus:border-[var(--brand)]"
+                  />
+                </label>
+              ) : null}
 
               <div className="flex flex-wrap justify-end gap-3">
                 <button

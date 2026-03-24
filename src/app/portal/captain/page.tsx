@@ -177,17 +177,6 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                 Add a new course and enter the details for all 18 holes.
               </p>
             </summary>
-
-            <div className="mt-6 flex items-start justify-between gap-4">
-              <div />
-              <Link
-                href="/portal"
-                className="rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface-strong)]"
-              >
-                Back to member portal
-              </Link>
-            </div>
-
             <form action={createCourse} className="mt-6 grid gap-5">
               <div>
                 <label
@@ -513,27 +502,30 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                     </div>
 
                       <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-                        <form action={updateMemberHandicap} className="flex flex-wrap items-end gap-3">
-                          <input type="hidden" name="memberId" value={member.id} />
-                          <label className="text-sm font-semibold text-[var(--brand-dark)]">
-                            Handicap
-                            <input
-                              type="number"
-                              name="handicapIndex"
-                              min={0}
-                              max={54}
-                              step={0.1}
-                              defaultValue={Number(member.handicapIndex).toFixed(1)}
-                              className="mt-2 w-28 rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm outline-none transition focus:border-[var(--brand)]"
-                            />
-                          </label>
-                          <button
-                            type="submit"
-                            className="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-white"
+                        <div className="flex flex-wrap items-center gap-3">
+                          <ConfirmActionModal
+                            action={updateMemberHandicap}
+                            buttonLabel="Edit player handicap"
+                            buttonClassName="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-white"
+                            title="Edit player handicap"
+                            description={`Update ${member.name}'s handicap for future group assignments and unsubmitted outings.`}
+                            hiddenFields={{ memberId: member.id }}
+                            confirmButtonLabel="Save handicap"
                           >
-                            Save handicap
-                          </button>
-                        </form>
+                            <label className="text-sm font-semibold text-[var(--brand-dark)]">
+                              Handicap
+                              <input
+                                type="number"
+                                name="handicapIndex"
+                                min={0}
+                                max={54}
+                                step={0.1}
+                                defaultValue={Number(member.handicapIndex).toFixed(1)}
+                                className="mt-2 w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm outline-none transition focus:border-[var(--brand)]"
+                              />
+                            </label>
+                          </ConfirmActionModal>
+                        </div>
 
                         <form action={updateMemberRole} className="flex flex-wrap gap-3">
                         <input type="hidden" name="memberId" value={member.id} />
