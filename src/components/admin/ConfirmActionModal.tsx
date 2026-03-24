@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 type ConfirmAction = (formData: FormData) => void | Promise<void>;
 
@@ -31,6 +31,7 @@ export function ConfirmActionModal({
   children,
 }: ConfirmActionModalProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   return (
     <>
@@ -47,7 +48,15 @@ export function ConfirmActionModal({
             <h3 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)]">{title}</h3>
             <p className="mt-3 text-sm leading-6 text-slate-600">{description}</p>
 
-            <form action={action} className="mt-5 grid gap-4">
+            <form
+              action={(formData) => {
+                startTransition(async () => {
+                  await action(formData);
+                  setIsOpen(false);
+                });
+              }}
+              className="mt-5 grid gap-4"
+            >
               {hiddenFields
                 ? Object.entries(hiddenFields).map(([name, value]) => (
                     <input key={name} type="hidden" name={name} value={String(value)} />
@@ -71,18 +80,20 @@ export function ConfirmActionModal({
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
+                  disabled={isPending}
                   className="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface)]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
+                  disabled={isPending}
                   className={
                     confirmButtonClassName ??
-                    "inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface-strong)]"
+                    "inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface-strong)] disabled:cursor-not-allowed disabled:opacity-60"
                   }
                 >
-                  {confirmButtonLabel ?? buttonLabel}
+                  {isPending ? "Working..." : confirmButtonLabel ?? buttonLabel}
                 </button>
               </div>
             </form>
