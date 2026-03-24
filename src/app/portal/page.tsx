@@ -48,8 +48,8 @@ export default async function PortalPage() {
             Welcome back, {member.name}
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-100/85 sm:text-base">
-            Phase 1 gives us secure member access, role-aware profiles, and the
-            protected area we will build the outing and scoring system on top of.
+            This is your place to check upcoming outings, view your group, and
+            keep up with scoring on the day.
           </p>
         </div>
       </section>
@@ -61,7 +61,7 @@ export default async function PortalPage() {
               Your profile
             </p>
             <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)]">
-              Member access is now protected
+              Your membership details
             </h2>
             <dl className="mt-6 grid gap-4 sm:grid-cols-2">
               <div className="rounded-[1.5rem] bg-[var(--surface-strong)] p-5">
@@ -106,36 +106,39 @@ export default async function PortalPage() {
                 ? "Admin Controls"
                 : member.role === "captain"
                   ? "Captain Controls"
-                  : "Ready for Phase 2"}
+                  : "Member Info"}
             </p>
             <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)]">
               {member.role === "admin" || member.role === "captain"
-                ? "Manage outings"
-                : "What comes next"}
+                ? "Manage the day"
+                : "What you can do here"}
             </h2>
             {member.role === "admin" || member.role === "captain" ? (
               <div className="mt-5">
                 <p className="text-sm leading-6 text-slate-700">
-                  You can now define course hole data, create outings, assign
-                  members into groups, and review member approvals.
+                  Open the admin area to create outings, update courses, organise
+                  groups, and keep everything ready for match day.
                 </p>
                 <Link
                   href="/portal/captain"
                   className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--brand)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
                 >
-                  Open captain admin
+                  Open admin area
                 </Link>
               </div>
             ) : (
               <ul className="mt-5 grid gap-3 text-sm leading-6 text-slate-700">
                 <li className="rounded-[1.25rem] bg-[var(--surface-strong)] px-4 py-3">
-                  The captain will create outings and group assignments here first.
+                  Your upcoming outings and group details will appear here once
+                  they have been confirmed.
                 </li>
                 <li className="rounded-[1.25rem] bg-[var(--surface-strong)] px-4 py-3">
-                  Your assigned round and group details will appear in this portal.
+                  On the day, your group can use this portal to keep score and
+                  check the live standings.
                 </li>
                 <li className="rounded-[1.25rem] bg-[var(--surface-strong)] px-4 py-3">
-                  Live scoring will then build on top of those outing assignments.
+                  When the round is complete, your final scores and results will
+                  be available here to review.
                 </li>
               </ul>
             )}
@@ -153,12 +156,12 @@ export default async function PortalPage() {
             Upcoming Outings
           </p>
           <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)]">
-            Your current schedule
+            Your upcoming golf
           </h2>
           <div className="mt-6 grid gap-3">
             {upcomingOutings.length === 0 ? (
               <p className="rounded-[1.5rem] bg-[var(--surface-strong)] px-4 py-4 text-sm text-slate-700">
-                No outings have been assigned to you yet.
+                You do not have any upcoming outings assigned yet.
               </p>
             ) : (
               upcomingOutings.map((outing) => {
@@ -180,18 +183,18 @@ export default async function PortalPage() {
                       <>
                         <p className="mt-2 text-sm text-slate-700">
                           Group {assignment.groupNumber}
-                          {assignment.isScorekeeper ? " â€¢ You are the scorekeeper" : ""}
+                          {assignment.isScorekeeper ? " • You are the scorekeeper" : ""}
                         </p>
                         <Link
                           href={`/portal/outings/${outing.id}`}
                           className="mt-3 inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-white"
                         >
-                          Open live scoring
+                          Open outing
                         </Link>
                       </>
                     ) : (
                       <p className="mt-2 text-sm text-slate-700">
-                        Created but not yet assigned to your group.
+                        This outing is in the calendar, and your group will be added soon.
                       </p>
                     )}
                   </article>
@@ -204,3 +207,4 @@ export default async function PortalPage() {
     </main>
   );
 }
+

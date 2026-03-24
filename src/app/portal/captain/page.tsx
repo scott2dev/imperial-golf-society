@@ -19,7 +19,7 @@ import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "Captain Admin",
-  description: "Create courses, outings, and group assignments.",
+  description: "Manage courses, outings, groups, and member approvals.",
 };
 
 type CaptainPageProps = {
@@ -142,12 +142,11 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
             Captain Admin
           </p>
           <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">
-            Create courses, outings, groups, and approvals
+            Manage your courses, outings, and groups
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-100/85 sm:text-base">
-            Build outings from the same shared data used on the fixtures page,
-            assign approved members into groups, and review any new member
-            requests before they enter the scoring system.
+            Use this area to keep the season organised, prepare the next outing,
+            and make sure everyone is in the right group before play begins.
           </p>
         </div>
       </section>
@@ -155,8 +154,8 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
       <section className="mx-auto mt-6 max-w-6xl px-4 sm:mt-8 sm:px-6">
         {params?.created === "1" ? (
           <div className="mb-6 rounded-[1.5rem] border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-800">
-            Outing created successfully. It now appears on the fixtures page, and
-            you can assign attendees into groups separately below.
+            Outing created successfully. It will now appear on the fixtures page,
+            and you can sort the groups below whenever you are ready.
           </div>
         ) : null}
 
@@ -167,10 +166,10 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                 Course Setup
               </p>
               <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)]">
-                Add a course and its 18-hole card
+                Add a course
               </h2>
               <p className="mt-2 text-sm text-slate-600">
-                Expand to create a new course or edit its hole data.
+                Add a new course and enter the details for all 18 holes.
               </p>
             </summary>
 
@@ -180,7 +179,7 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                 href="/portal"
                 className="rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface-strong)]"
               >
-                Back to portal
+                Back to member portal
               </Link>
             </div>
 
@@ -203,11 +202,11 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
 
               <div>
                 <p className="text-sm font-semibold text-[var(--brand-dark)]">
-                  Hole setup
+                  Hole details
                 </p>
                 <p className="mt-1 text-sm text-slate-600">
-                  Enter the real par and stroke index for all 18 holes. This keeps
-                  the scoring engine accurate later on.
+                  Enter the correct par and stroke index for every hole so scoring
+                  is accurate on the day.
                 </p>
               </div>
 
@@ -273,16 +272,17 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                 Outing Builder
               </p>
               <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)]">
-                Create an outing event
+                Create an outing
               </h2>
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                Expand to create the outing itself first, then manage groups later.
+                Add the outing details here first, then return later to sort
+                players into groups.
               </p>
             </summary>
 
             {courses.length === 0 ? (
               <div className="mt-6 rounded-[1.5rem] border border-dashed border-[var(--border)] bg-[var(--surface-strong)] px-5 py-4 text-sm text-slate-700">
-                Add at least one course first before creating an outing.
+                Add a course first before creating an outing.
               </div>
             ) : (
               <form action={createOuting} className="mt-6 grid gap-5">
@@ -397,7 +397,7 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                   type="submit"
                   className="inline-flex min-h-12 items-center justify-center rounded-full bg-[var(--brand)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
                 >
-                  Create outing event
+                  Create outing
                 </button>
               </form>
             )}
@@ -421,18 +421,18 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                 Approvals and roles
               </h2>
               <p className="mt-2 text-sm text-slate-600">
-                Expand to review pending members and manage roles.
+                Review new member requests and update roles when needed.
               </p>
             </summary>
             <div className="mt-6 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
               <div>
                 <h3 className="text-lg font-semibold text-[var(--brand-dark)]">
                   Pending member requests
-              </h3>
+                </h3>
               <div className="mt-4 grid gap-3">
                 {pendingMembers.length === 0 ? (
                   <p className="rounded-[1.5rem] bg-[var(--surface-strong)] px-4 py-4 text-sm text-slate-700">
-                    No member approvals are waiting right now.
+                    There are no membership requests waiting for review right now.
                   </p>
                 ) : (
                   pendingMembers.map((member) => (
@@ -448,7 +448,7 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                         Requested handicap {Number(member.handicapIndex).toFixed(1)}
                       </p>
                       <p className="mt-1 text-xs uppercase tracking-[0.16em] text-slate-500">
-                        Waiting for captain or admin approval
+                        Waiting for approval
                       </p>
                       <div className="mt-4 flex flex-wrap gap-3">
                         <form action={approveMemberRequest}>
@@ -541,10 +541,10 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
               Current Data
             </p>
             <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)]">
-              Courses and recent outings
+              Courses and outings
             </h2>
             <p className="mt-2 text-sm text-slate-600">
-              Expand to edit existing courses, outings, and group setups.
+              Review what has already been added and make any changes you need.
             </p>
           </summary>
 
@@ -567,7 +567,7 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                           <div>
                             <p className="font-semibold text-[var(--brand-dark)]">{course.name}</p>
                             <p className="mt-1 text-sm text-slate-600">
-                              {course.holes.length} holes configured. Expand to edit pars and
+                              {course.holes.length} holes added. Open to update pars and
                               stroke indexes.
                             </p>
                           </div>
@@ -667,7 +667,7 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
               <div className="mt-4 grid gap-3">
                 {outings.length === 0 ? (
                   <p className="rounded-[1.5rem] bg-[var(--surface-strong)] px-4 py-3 text-sm text-slate-700">
-                    No outings created yet.
+                    No outings have been created yet.
                   </p>
                 ) : (
                   outings.map((outing) => (
@@ -794,7 +794,7 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                             href={`/portal/outings/${outing.id}`}
                             className="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-white"
                           >
-                            Open live scoring
+                            Open outing
                           </Link>
                         </div>
                       </form>
@@ -823,18 +823,17 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
               Group Builder
             </p>
             <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)]">
-              Attendance and fourball setup
+              Attendance and group setup
             </h2>
             <p className="mt-2 text-sm text-slate-600">
-              Expand to build the groups for an outing in a dedicated space,
-              separate from the outing event details.
+              Choose who is playing and place them into their groups for the day.
             </p>
           </summary>
 
           <div className="mt-6 grid gap-4">
             {outings.length === 0 ? (
               <p className="rounded-[1.5rem] bg-[var(--surface-strong)] px-4 py-4 text-sm text-slate-700">
-                Create an outing event first, then come back here to build the groups.
+                Create an outing first, then come back here to sort the groups.
               </p>
             ) : (
               outings.map((outing) => (
@@ -853,11 +852,11 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                           at {outing.course.name}
                         </p>
                         <p className="mt-2 text-sm text-slate-700">
-                          {outing.players.length} attendees currently assigned
+                          {outing.players.length} players currently assigned
                         </p>
                       </div>
                       <span className="rounded-full border border-[var(--border)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                        Build groups
+                        Edit groups
                       </span>
                     </div>
                   </summary>
@@ -869,8 +868,8 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                         Attendance and groups
                       </p>
                       <p className="mt-1 text-sm text-slate-600">
-                        Add members into group tiles here. Players will choose the
-                        scorekeeper themselves on the day.
+                        Add players to each group here. The group can decide on
+                        the day who will keep score.
                       </p>
                     </div>
                     <OutingGroupsEditor
@@ -894,7 +893,7 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                         type="submit"
                         className="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-white"
                       >
-                        Save attendees and groups
+                        Save groups
                       </button>
                     </div>
                   </form>
