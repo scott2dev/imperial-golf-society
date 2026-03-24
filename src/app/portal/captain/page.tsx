@@ -87,6 +87,7 @@ type CaptainOuting = {
 
 export default async function CaptainPage({ searchParams }: CaptainPageProps) {
   const captain = await requireCaptain();
+  const isAdmin = captain.user.role === "admin";
 
   const [courses, members, outings, pendingMembers, params]: [
     CaptainCourse[],
@@ -364,37 +365,6 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label
-                      htmlFor="outing-image-src"
-                      className="text-sm font-semibold text-[var(--brand-dark)]"
-                    >
-                      Tile image path
-                    </label>
-                    <input
-                      id="outing-image-src"
-                      name="imageSrc"
-                      placeholder="/bangor.jpg"
-                      className="mt-2 w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[var(--brand)]"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="outing-image-alt"
-                      className="text-sm font-semibold text-[var(--brand-dark)]"
-                    >
-                      Tile image alt text
-                    </label>
-                    <input
-                      id="outing-image-alt"
-                      name="imageAlt"
-                      placeholder="Bangor Golf Club"
-                      className="mt-2 w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[var(--brand)]"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label
                       htmlFor="outing-sponsor-name"
                       className="text-sm font-semibold text-[var(--brand-dark)]"
                     >
@@ -435,23 +405,29 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
         </div>
       </section>
 
-      <section className="mx-auto mt-6 max-w-6xl px-4 sm:px-6">
-        <details className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
-          <summary className="cursor-pointer list-none">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand)]">
-              Member Controls
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)]">
-              Approvals and roles
-            </h2>
-            <p className="mt-2 text-sm text-slate-600">
-              Expand to review pending members and manage roles.
-            </p>
-          </summary>
-          <div className="mt-6 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-            <div>
-              <h3 className="text-lg font-semibold text-[var(--brand-dark)]">
-                Pending member requests
+      {isAdmin ? (
+        <section className="mx-auto mt-6 max-w-6xl px-4 sm:px-6">
+          <details className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
+            <summary className="cursor-pointer list-none">
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand)]">
+                  Member Controls
+                </p>
+                <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-800">
+                  Visible to admin only
+                </span>
+              </div>
+              <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)]">
+                Approvals and roles
+              </h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Expand to review pending members and manage roles.
+              </p>
+            </summary>
+            <div className="mt-6 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+              <div>
+                <h3 className="text-lg font-semibold text-[var(--brand-dark)]">
+                  Pending member requests
               </h3>
               <div className="mt-4 grid gap-3">
                 {pendingMembers.length === 0 ? (
@@ -498,22 +474,15 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                   ))
                 )}
               </div>
-            </div>
+              </div>
 
-            <div>
-              <div className="flex items-center justify-between gap-4">
+              <div>
                 <h3 className="text-lg font-semibold text-[var(--brand-dark)]">
                   Approved members
                 </h3>
-                <span className="rounded-full border border-[var(--border)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                  {captain.user.role === "admin"
-                    ? "Admin can change roles"
-                    : "Captain can review only"}
-                </span>
-              </div>
-              <div className="mt-4 grid gap-3">
-                {members.map((member) => (
-                  <article
+                <div className="mt-4 grid gap-3">
+                  {members.map((member) => (
+                    <article
                     key={member.id}
                     className="rounded-[1.5rem] bg-[var(--surface-strong)] px-4 py-4"
                   >
@@ -538,7 +507,6 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                       </div>
                     </div>
 
-                    {captain.user.role === "admin" ? (
                       <form action={updateMemberRole} className="mt-4 flex flex-wrap gap-3">
                         <input type="hidden" name="memberId" value={member.id} />
                         <select
@@ -557,14 +525,14 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                           Save role
                         </button>
                       </form>
-                    ) : null}
-                  </article>
-                ))}
+                    </article>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        </details>
-      </section>
+          </details>
+        </section>
+      ) : null}
 
       <section className="mx-auto mt-6 max-w-6xl px-4 sm:px-6">
         <details className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
@@ -778,29 +746,6 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                                   </option>
                                 ))}
                               </select>
-                            </label>
-                          </div>
-                        </div>
-
-                        <div className="grid gap-4 sm:grid-cols-2">
-                          <div>
-                            <label className="text-sm font-semibold text-[var(--brand-dark)]">
-                              Tile image path
-                              <input
-                                name="imageSrc"
-                                defaultValue={outing.imageSrc ?? ""}
-                                className="mt-2 w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm outline-none transition focus:border-[var(--brand)]"
-                              />
-                            </label>
-                          </div>
-                          <div>
-                            <label className="text-sm font-semibold text-[var(--brand-dark)]">
-                              Tile image alt text
-                              <input
-                                name="imageAlt"
-                                defaultValue={outing.imageAlt ?? ""}
-                                className="mt-2 w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm outline-none transition focus:border-[var(--brand)]"
-                              />
                             </label>
                           </div>
                         </div>
