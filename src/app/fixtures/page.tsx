@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import type { Prisma } from "@prisma/client";
 import Image from "next/image";
 import FixtureImageLink from "@/components/FixtureImageLink";
 import { fixtures as fixturePresentation } from "@/lib/fixtures-data";
@@ -37,14 +36,26 @@ function formatFixtureDate(date: Date) {
   });
 }
 
+type FixtureOuting = {
+  id: string;
+  title: string;
+  outingDate: Date;
+  teeTime: string | null;
+  imageSrc: string | null;
+  imageAlt: string | null;
+  sponsorName: string | null;
+  sponsorUrl: string | null;
+  featured: boolean;
+  sourceFixtureId: string | null;
+  course: {
+    name: string;
+    websiteUrl: string | null;
+    mapsUrl: string | null;
+  };
+};
+
 export default async function FixturesPage() {
-  const outings: Array<
-    Prisma.OutingGetPayload<{
-      include: {
-        course: true;
-      };
-    }>
-  > = await prisma.outing.findMany({
+  const outings: FixtureOuting[] = await prisma.outing.findMany({
     orderBy: { outingDate: "asc" },
     include: {
       course: true,
