@@ -27,15 +27,19 @@ function getScoreState(grossStrokes: number, par: number) {
 
 export function ScoreMarker({ grossStrokes, par }: ScoreMarkerProps) {
   if (grossStrokes == null) {
-    return <span className="text-slate-500">—</span>;
+    return (
+      <span className="inline-flex h-6 min-w-6 items-center justify-center text-xs text-slate-500">
+        —
+      </span>
+    );
   }
 
   const scoreState = getScoreState(grossStrokes, par);
 
   if (scoreState === "double-circle") {
     return (
-      <span className="inline-flex rounded-full border-2 border-sky-500 p-[3px]">
-        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border-2 border-sky-500 bg-sky-50 text-sm font-semibold text-sky-900">
+      <span className="inline-flex rounded-full border-[1.5px] border-sky-500 p-[2px]">
+        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border-[1.5px] border-sky-500 bg-sky-50 text-xs font-semibold text-sky-900">
           {grossStrokes}
         </span>
       </span>
@@ -44,7 +48,7 @@ export function ScoreMarker({ grossStrokes, par }: ScoreMarkerProps) {
 
   if (scoreState === "circle") {
     return (
-      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-emerald-500 bg-emerald-50 text-sm font-semibold text-emerald-900">
+      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border-[1.5px] border-emerald-500 bg-emerald-50 text-xs font-semibold text-emerald-900">
         {grossStrokes}
       </span>
     );
@@ -52,7 +56,7 @@ export function ScoreMarker({ grossStrokes, par }: ScoreMarkerProps) {
 
   if (scoreState === "square") {
     return (
-      <span className="inline-flex h-8 w-8 items-center justify-center border-2 border-amber-500 bg-amber-50 text-sm font-semibold text-amber-900">
+      <span className="inline-flex h-7 w-7 items-center justify-center border-[1.5px] border-amber-500 bg-amber-50 text-xs font-semibold text-amber-900">
         {grossStrokes}
       </span>
     );
@@ -60,8 +64,8 @@ export function ScoreMarker({ grossStrokes, par }: ScoreMarkerProps) {
 
   if (scoreState === "double-square") {
     return (
-      <span className="inline-flex border-2 border-rose-500 p-[3px]">
-        <span className="inline-flex h-7 w-7 items-center justify-center border-2 border-rose-500 bg-rose-50 text-sm font-semibold text-rose-900">
+      <span className="inline-flex border-[1.5px] border-rose-500 p-[2px]">
+        <span className="inline-flex h-6 w-6 items-center justify-center border-[1.5px] border-rose-500 bg-rose-50 text-xs font-semibold text-rose-900">
           {grossStrokes}
         </span>
       </span>
@@ -69,7 +73,7 @@ export function ScoreMarker({ grossStrokes, par }: ScoreMarkerProps) {
   }
 
   return (
-    <span className="inline-flex h-8 min-w-8 items-center justify-center text-sm font-semibold text-[var(--brand-dark)]">
+    <span className="inline-flex h-7 min-w-7 items-center justify-center text-xs font-semibold text-[var(--brand-dark)]">
       {grossStrokes}
     </span>
   );

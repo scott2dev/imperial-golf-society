@@ -515,10 +515,11 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                         <table className="min-w-full border-collapse text-left text-sm">
                           <thead className="bg-[var(--surface)] text-[var(--brand-dark)]">
                             <tr>
-                              <th className="px-3 py-2 font-semibold">Hole</th>
-                              <th className="px-3 py-2 font-semibold">Gross</th>
-                              <th className="px-3 py-2 font-semibold">Net</th>
-                              <th className="px-3 py-2 font-semibold">Pts</th>
+                              <th className="px-2 py-1.5 font-semibold">Hole</th>
+                              <th className="px-2 py-1.5 font-semibold">Par</th>
+                              <th className="px-2 py-1.5 font-semibold">Gross</th>
+                              <th className="px-2 py-1.5 font-semibold">Net</th>
+                              <th className="px-2 py-1.5 font-semibold">Pts</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -532,16 +533,17 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                                   key={`${player.memberId}-submitted-${hole.holeNumber}`}
                                   className="border-t border-[var(--border)]"
                                 >
-                                  <td className="px-3 py-2 font-semibold text-[var(--brand-dark)]">
+                                  <td className="px-2 py-1.5 font-semibold text-[var(--brand-dark)]">
                                     {hole.holeNumber}
                                   </td>
-                                  <td className="px-3 py-2 text-slate-700">
+                                  <td className="px-2 py-1.5 text-slate-700">{hole.par}</td>
+                                  <td className="px-2 py-1.5 text-slate-700">
                                     <ScoreMarker grossStrokes={score?.grossStrokes} par={hole.par} />
                                   </td>
-                                  <td className="px-3 py-2 text-slate-700">
+                                  <td className="px-2 py-1.5 text-slate-700">
                                     {score?.netStrokes ?? "—"}
                                   </td>
-                                  <td className="px-3 py-2 font-semibold text-[var(--brand-dark)]">
+                                  <td className="px-2 py-1.5 font-semibold text-[var(--brand-dark)]">
                                     {score?.stablefordPoints ?? "—"}
                                   </td>
                                 </tr>
@@ -893,10 +895,11 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                           <table className="min-w-full border-collapse text-left text-sm">
                             <thead className="bg-[var(--surface)] text-[var(--brand-dark)]">
                               <tr>
-                                <th className="px-3 py-2 font-semibold">Hole</th>
-                                <th className="px-3 py-2 font-semibold">Gross</th>
-                                <th className="px-3 py-2 font-semibold">Net</th>
-                                <th className="px-3 py-2 font-semibold">Pts</th>
+                                <th className="px-2 py-1.5 font-semibold">Hole</th>
+                                <th className="px-2 py-1.5 font-semibold">Par</th>
+                                <th className="px-2 py-1.5 font-semibold">Gross</th>
+                                <th className="px-2 py-1.5 font-semibold">Net</th>
+                                <th className="px-2 py-1.5 font-semibold">Pts</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -910,16 +913,17 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                                     key={`${result.memberId}-${hole.holeNumber}`}
                                     className="border-t border-[var(--border)]"
                                   >
-                                    <td className="px-3 py-2 font-semibold text-[var(--brand-dark)]">
+                                    <td className="px-2 py-1.5 font-semibold text-[var(--brand-dark)]">
                                       {hole.holeNumber}
                                     </td>
-                                    <td className="px-3 py-2 text-slate-700">
+                                    <td className="px-2 py-1.5 text-slate-700">{hole.par}</td>
+                                    <td className="px-2 py-1.5 text-slate-700">
                                       <ScoreMarker grossStrokes={score?.grossStrokes} par={hole.par} />
                                     </td>
-                                    <td className="px-3 py-2 text-slate-700">
+                                    <td className="px-2 py-1.5 text-slate-700">
                                       {score?.netStrokes ?? "—"}
                                     </td>
-                                    <td className="px-3 py-2 font-semibold text-[var(--brand-dark)]">
+                                    <td className="px-2 py-1.5 font-semibold text-[var(--brand-dark)]">
                                       {score?.stablefordPoints ?? "—"}
                                     </td>
                                   </tr>
