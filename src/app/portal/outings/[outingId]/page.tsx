@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { getCurrentMember } from "@/lib/auth";
 import { GroupSignatureBoard } from "@/components/scoring/GroupSignatureBoard";
 import { OutingScorecard } from "@/components/scoring/OutingScorecard";
+import { ScoreMarker } from "@/components/scoring/ScoreMarker";
 import { ScoreInput } from "@/components/scoring/ScoreInput";
 import { prisma } from "@/lib/prisma";
 import { calculateStablefordTotal } from "@/lib/scoring";
@@ -535,7 +536,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                                     {hole.holeNumber}
                                   </td>
                                   <td className="px-3 py-2 text-slate-700">
-                                    {score?.grossStrokes ?? "—"}
+                                    <ScoreMarker grossStrokes={score?.grossStrokes} par={hole.par} />
                                   </td>
                                   <td className="px-3 py-2 text-slate-700">
                                     {score?.netStrokes ?? "—"}
@@ -913,7 +914,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                                       {hole.holeNumber}
                                     </td>
                                     <td className="px-3 py-2 text-slate-700">
-                                      {score?.grossStrokes ?? "—"}
+                                      <ScoreMarker grossStrokes={score?.grossStrokes} par={hole.par} />
                                     </td>
                                     <td className="px-3 py-2 text-slate-700">
                                       {score?.netStrokes ?? "—"}
