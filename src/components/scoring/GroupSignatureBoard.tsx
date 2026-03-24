@@ -23,6 +23,7 @@ export function GroupSignatureBoard({
   players,
 }: GroupSignatureBoardProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const canvasContainerRef = useRef<HTMLDivElement | null>(null);
   const isDrawingRef = useRef(false);
   const [selectedMemberId, setSelectedMemberId] = useState(players[0]?.memberId ?? "");
   const [signatures, setSignatures] = useState<Record<string, PlayerSignature>>(() =>
@@ -41,8 +42,9 @@ export function GroupSignatureBoard({
 
   useEffect(() => {
     const canvas = canvasRef.current;
+    const container = canvasContainerRef.current;
 
-    if (!canvas) {
+    if (!canvas || !container) {
       return;
     }
 
@@ -53,17 +55,21 @@ export function GroupSignatureBoard({
     }
 
     const ratio = window.devicePixelRatio || 1;
-    canvas.width = 520 * ratio;
-    canvas.height = 200 * ratio;
+    const width = Math.max(container.clientWidth, 1);
+    const height = 200;
+
+    canvas.width = width * ratio;
+    canvas.height = height * ratio;
     canvas.style.width = "100%";
-    canvas.style.height = "200px";
-    context.scale(ratio, ratio);
+    canvas.style.height = `${height}px`;
+    context.setTransform(ratio, 0, 0, ratio, 0, 0);
     context.lineCap = "round";
     context.lineJoin = "round";
     context.lineWidth = 2.5;
     context.strokeStyle = "#223127";
     context.fillStyle = "#faf7f1";
-    context.fillRect(0, 0, 520, 200);
+    context.clearRect(0, 0, width, height);
+    context.fillRect(0, 0, width, height);
     setHasInk(false);
   }, [selectedMemberId]);
 
@@ -78,10 +84,13 @@ export function GroupSignatureBoard({
     }
 
     const bounds = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / bounds.width;
+    const scaleY = canvas.height / bounds.height;
+    const ratio = window.devicePixelRatio || 1;
 
     return {
-      x: event.clientX - bounds.left,
-      y: event.clientY - bounds.top,
+      x: ((event.clientX - bounds.left) * scaleX) / ratio,
+      y: ((event.clientY - bounds.top) * scaleY) / ratio,
     };
   }
 
@@ -132,9 +141,12 @@ export function GroupSignatureBoard({
       return;
     }
 
-    context.clearRect(0, 0, canvas.width, canvas.height);
+    const width = canvas.width / (window.devicePixelRatio || 1);
+    const height = canvas.height / (window.devicePixelRatio || 1);
+
+    context.clearRect(0, 0, width, height);
     context.fillStyle = "#faf7f1";
-    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillRect(0, 0, width, height);
     setHasInk(false);
     setSaveError(null);
   }
@@ -230,7 +242,10 @@ export function GroupSignatureBoard({
             ) : null}
           </div>
 
-          <div className="mt-4 overflow-hidden rounded-[1rem] border border-[var(--border)] bg-[#faf7f1]">
+          <div
+            ref={canvasContainerRef}
+            className="mt-4 overflow-hidden rounded-[1rem] border border-[var(--border)] bg-[#faf7f1]"
+          >
             <canvas
               ref={canvasRef}
               onPointerDown={startDrawing}
