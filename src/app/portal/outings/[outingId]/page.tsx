@@ -160,6 +160,9 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
   const visibleSignatures = memberAssignment
     ? outing.signatures.filter((signature) => signature.groupNumber === memberAssignment.groupNumber)
     : [];
+  const signaturesByMember = new Map(
+    outing.signatures.map((signature) => [signature.memberId, signature]),
+  );
   const scoresByMember = new Map(
     outing.holeScores.map((score) => [`${score.memberId}-${score.holeNumber}`, score]),
   );
@@ -741,14 +744,31 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                       className="rounded-[1.5rem] bg-[var(--surface-strong)] px-4 py-4"
                     >
                       <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <p className="font-semibold text-[var(--brand-dark)]">
-                            {result.position ? `${result.position}. ` : ""}
-                            {result.member.name}
-                          </p>
-                          <p className="mt-1 text-sm text-slate-600">
-                            Handicap {Number(result.member.handicapIndex).toFixed(1)}
-                          </p>
+                        <div className="flex items-start gap-4">
+                          <div>
+                            {signaturesByMember.get(result.memberId)?.signatureData ? (
+                              <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[#faf7f1]">
+                                <img
+                                  src={signaturesByMember.get(result.memberId)?.signatureData}
+                                  alt={`${result.member.name} signature`}
+                                  className="h-12 w-24 object-contain"
+                                />
+                              </div>
+                            ) : (
+                              <div className="inline-flex h-12 w-24 items-center justify-center rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)] text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                Unsigned
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-[var(--brand-dark)]">
+                              {result.position ? `${result.position}. ` : ""}
+                              {result.member.name}
+                            </p>
+                            <p className="mt-1 text-sm text-slate-600">
+                              Handicap {Number(result.member.handicapIndex).toFixed(1)}
+                            </p>
+                          </div>
                         </div>
                         <p className="text-sm font-semibold text-[var(--brand-dark)]">
                           {result.totalPoints} pts
