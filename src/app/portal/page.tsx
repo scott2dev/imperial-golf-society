@@ -9,9 +9,22 @@ export const metadata: Metadata = {
   description: "Protected member portal for outings and live scoring.",
 };
 
+type PortalOuting = {
+  id: string;
+  title: string;
+  outingDate: Date;
+  course: {
+    name: string;
+  };
+  players: Array<{
+    groupNumber: number;
+    isScorekeeper: boolean;
+  }>;
+};
+
 export default async function PortalPage() {
   const member = await getCurrentMember();
-  const upcomingOutings = await prisma.outing.findMany({
+  const upcomingOutings: PortalOuting[] = await prisma.outing.findMany({
     orderBy: { outingDate: "asc" },
     include: {
       course: true,
