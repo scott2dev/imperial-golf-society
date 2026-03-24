@@ -35,6 +35,15 @@ type AssignmentForMember = {
   };
 } | null;
 
+type SaveScoresTransaction = {
+  outingSignature: {
+    deleteMany: typeof prisma.outingSignature.deleteMany;
+  };
+  holeScore: {
+    upsert: typeof prisma.holeScore.upsert;
+  };
+};
+
 async function getAssignmentForMember(outingId: string, memberId: string) {
   return prisma.outingPlayer.findUnique({
     where: {
@@ -203,7 +212,7 @@ export async function saveHoleScores(formData: FormData) {
     stablefordPoints: number;
   }> = [];
 
-  await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx: SaveScoresTransaction) => {
     await tx.outingSignature.deleteMany({
       where: {
         outingId,
