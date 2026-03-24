@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { ConfirmActionModal } from "@/components/admin/ConfirmActionModal";
 import { ScoreMarker } from "@/components/scoring/ScoreMarker";
 import { getSession } from "@/lib/auth";
 import { getMemberRecordById } from "@/lib/member-store";
 import { prisma } from "@/lib/prisma";
 import { calculateStablefordTotal } from "@/lib/scoring";
+import { unpublishOutingResults } from "../../portal/results/[outingId]/actions";
 
 type ResultsPageProps = {
   params: Promise<{
@@ -256,12 +258,25 @@ export default async function PublicOutingResultsPage({ params }: ResultsPagePro
                   : "These results are currently visible only to the captain/admin until they are published."}
               </p>
             </div>
-            <Link
-              href={isCaptainOrAdmin ? `/portal/outings/${outing.id}` : "/results"}
-              className="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface-strong)]"
-            >
-              {isCaptainOrAdmin ? "Back to outing" : "Back to results"}
-            </Link>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href={isCaptainOrAdmin ? `/portal/outings/${outing.id}` : "/results"}
+                className="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface-strong)]"
+              >
+                {isCaptainOrAdmin ? "Back to outing" : "Back to results"}
+              </Link>
+              {isCaptainOrAdmin && isPublished ? (
+                <ConfirmActionModal
+                  action={unpublishOutingResults}
+                  buttonLabel="Unpublish results"
+                  buttonClassName="inline-flex min-h-10 items-center justify-center rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
+                  title="Unpublish outing results"
+                  description="This will remove the outing from the public results page until you publish it again."
+                  confirmWord="UNPUBLISH"
+                  hiddenFields={{ outingId: outing.id }}
+                />
+              ) : null}
+            </div>
           </div>
 
           {isCaptainOrAdmin && !isPublished ? (
