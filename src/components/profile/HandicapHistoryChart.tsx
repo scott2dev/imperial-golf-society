@@ -18,7 +18,7 @@ export function HandicapHistoryChart({ points }: HandicapHistoryChartProps) {
   }
 
   const width = 520;
-  const height = 250;
+  const height = 320;
   const paddingLeft = 34;
   const paddingRight = 16;
   const paddingTop = 20;
@@ -131,16 +131,16 @@ export function HandicapHistoryChart({ points }: HandicapHistoryChartProps) {
         </p>
       ) : null}
 
-      <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
         {points.slice(-4).map((point) => (
           <div
             key={`${point.label}-${point.handicapIndex}-summary`}
-            className="rounded-[0.9rem] bg-white/80 px-3 py-2"
+            className="rounded-[0.8rem] bg-white/80 px-2.5 py-1.5"
           >
-            <p className="text-[11px] uppercase tracking-[0.12em] text-slate-500">
+            <p className="text-[10px] uppercase tracking-[0.1em] text-slate-500">
               {point.label}
             </p>
-            <p className="mt-1.5 text-base font-semibold text-[var(--brand-dark)]">
+            <p className="mt-1 text-sm font-semibold text-[var(--brand-dark)]">
               {point.handicapIndex.toFixed(1)}
             </p>
           </div>
