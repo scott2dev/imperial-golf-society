@@ -11,6 +11,8 @@ type WallOfShameImage = {
   id: string;
   imageData: string;
   tagline: string;
+  photoDate: Date | null;
+  location: string | null;
 };
 
 export default async function WallOfShamePage() {
@@ -61,6 +63,20 @@ export default async function WallOfShamePage() {
                   className="aspect-[4/5] w-full object-cover"
                 />
                 <div className="border-t border-[var(--border)] bg-[var(--surface-strong)] px-5 py-4">
+                  {image.photoDate || image.location ? (
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--brand)]">
+                      {[
+                        image.photoDate
+                          ? new Date(image.photoDate).toLocaleDateString("en-GB", {
+                              dateStyle: "medium",
+                            })
+                          : null,
+                        image.location,
+                      ]
+                        .filter(Boolean)
+                        .join(" • ")}
+                    </p>
+                  ) : null}
                   <p className="text-sm font-medium leading-6 text-[var(--brand-dark)]">
                     {image.tagline}
                   </p>

@@ -25,6 +25,22 @@ function getTrimmedString(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
 }
 
+function getOptionalDateValue(formData: FormData, key: string) {
+  const raw = getTrimmedString(formData, key);
+
+  if (!raw) {
+    return null;
+  }
+
+  const parsed = new Date(`${raw}T12:00:00`);
+
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error(`Invalid date for ${key}.`);
+  }
+
+  return parsed;
+}
+
 function assertConfirmationPhrase(formData: FormData, expected: string) {
   const confirmation = getTrimmedString(formData, "confirmation").toUpperCase();
 
@@ -640,6 +656,8 @@ export async function createWallOfShameImage(formData: FormData) {
   await requireAdmin();
 
   const tagline = getTrimmedString(formData, "tagline");
+  const photoDate = getOptionalDateValue(formData, "photoDate");
+  const location = getTrimmedString(formData, "location");
   const image = formData.get("image");
 
   if (!tagline) {
@@ -673,7 +691,41 @@ export async function createWallOfShameImage(formData: FormData) {
     data: {
       imageData,
       tagline,
+      photoDate,
+      location: location || null,
       sortOrder: (highestSortOrder?.sortOrder ?? -1) + 1,
+    },
+  });
+
+  revalidatePath("/members");
+  revalidatePath("/members/wall-of-shame");
+  revalidatePath("/portal/captain");
+}
+
+export async function updateWallOfShameImage(formData: FormData) {
+  await requireAdmin();
+
+  const imageId = getTrimmedString(formData, "imageId");
+  const tagline = getTrimmedString(formData, "tagline");
+  const photoDate = getOptionalDateValue(formData, "photoDate");
+  const location = getTrimmedString(formData, "location");
+
+  if (!imageId) {
+    throw new Error("Image id is required.");
+  }
+
+  if (!tagline) {
+    throw new Error("A tagline is required.");
+  }
+
+  await prisma.wallOfShameImage.update({
+    where: {
+      id: imageId,
+    },
+    data: {
+      tagline,
+      photoDate,
+      location: location || null,
     },
   });
 

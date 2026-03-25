@@ -21,6 +21,7 @@ import {
   updateMemberRole,
   updateOuting,
   updateOutingGroups,
+  updateWallOfShameImage,
 } from "@/app/portal/captain/actions";
 import { ConfirmActionModal } from "@/components/admin/ConfirmActionModal";
 import OutingGroupsEditor from "@/components/captain/OutingGroupsEditor";
@@ -108,6 +109,8 @@ type WallOfShameAdminImage = {
   id: string;
   imageData: string;
   tagline: string;
+  photoDate: Date | null;
+  location: string | null;
   sortOrder: number;
 };
 
@@ -540,6 +543,26 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                     />
                   </label>
 
+                  <label className="text-sm font-semibold text-[var(--brand-dark)]">
+                    Date
+                    <input
+                      type="date"
+                      name="photoDate"
+                      className="mt-2 w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[var(--brand)]"
+                    />
+                  </label>
+
+                  <label className="text-sm font-semibold text-[var(--brand-dark)]">
+                    Location
+                    <input
+                      type="text"
+                      name="location"
+                      maxLength={120}
+                      placeholder="Bangor Golf Club"
+                      className="mt-2 w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[var(--brand)]"
+                    />
+                  </label>
+
                   <button
                     type="submit"
                     className="inline-flex min-h-10 items-center justify-center rounded-full bg-[var(--brand)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
@@ -574,7 +597,63 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                         <p className="mt-3 text-sm font-medium text-[var(--brand-dark)]">
                           {image.tagline}
                         </p>
+                        {image.photoDate ? (
+                          <p className="mt-1 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--brand)]">
+                            {new Date(image.photoDate).toLocaleDateString("en-GB", {
+                              dateStyle: "medium",
+                            })}
+                          </p>
+                        ) : null}
+                        {image.location ? (
+                          <p className="mt-1 text-sm text-slate-600">{image.location}</p>
+                        ) : null}
                         <div className="mt-4">
+                          <ConfirmActionModal
+                            action={updateWallOfShameImage}
+                            buttonLabel="Edit caption"
+                            buttonClassName="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface)]"
+                            title="Edit wall of shame image"
+                            description="Update the caption, date, and location shown with this photo."
+                            confirmButtonLabel="Save changes"
+                            hiddenFields={{ imageId: image.id }}
+                          >
+                            <label className="text-sm font-semibold text-[var(--brand-dark)]">
+                              Tagline
+                              <input
+                                type="text"
+                                name="tagline"
+                                required
+                                maxLength={160}
+                                defaultValue={image.tagline}
+                                className="mt-2 w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-[var(--brand)]"
+                              />
+                            </label>
+                            <label className="text-sm font-semibold text-[var(--brand-dark)]">
+                              Date
+                              <input
+                                type="date"
+                                name="photoDate"
+                                defaultValue={
+                                  image.photoDate
+                                    ? new Date(image.photoDate).toISOString().slice(0, 10)
+                                    : ""
+                                }
+                                className="mt-2 w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-[var(--brand)]"
+                              />
+                            </label>
+                            <label className="text-sm font-semibold text-[var(--brand-dark)]">
+                              Location
+                              <input
+                                type="text"
+                                name="location"
+                                maxLength={120}
+                                defaultValue={image.location ?? ""}
+                                className="mt-2 w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-[var(--brand)]"
+                              />
+                            </label>
+                          </ConfirmActionModal>
+                        </div>
+                        <div className="mt-3">
                           <ConfirmActionModal
                             action={deleteWallOfShameImage}
                             buttonLabel="Delete image"
