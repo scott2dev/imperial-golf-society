@@ -167,7 +167,7 @@ export default async function ProfilePage() {
       </section>
 
       <section className="mx-auto mt-6 max-w-6xl px-4 sm:mt-8 sm:px-6">
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-[34rem] lg:max-w-5xl">
           <div className="grid gap-4 lg:grid-cols-[0.85fr_1.15fr]">
           <article className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand)]">
