@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireAdmin, requireCaptain } from "@/lib/auth";
 import { createPlaceholderHoleSetup } from "@/lib/course-defaults";
 import { fixtures } from "@/lib/fixtures-data";
+import { currentSeason } from "@/lib/key-members-data";
 import {
   approveMember,
   deleteMember as deleteStoredMember,
@@ -830,6 +831,73 @@ export async function reorderAboutCarouselImage(formData: FormData) {
   ]);
 
   revalidatePath("/about");
+  revalidatePath("/portal/captain");
+}
+
+export async function upsertSeasonKeyMemberProfile(formData: FormData) {
+  await requireAdmin();
+
+  const roleKey = getTrimmedString(formData, "roleKey");
+  const roleLabel = getTrimmedString(formData, "roleLabel");
+  const memberName = getTrimmedString(formData, "memberName");
+  const image = formData.get("image");
+
+  if (!roleKey || !roleLabel || !memberName) {
+    throw new Error("Role key, role label, and member name are required.");
+  }
+
+  let imageData: string | undefined;
+
+  if (image instanceof File && image.size > 0) {
+    if (!image.type.startsWith("image/")) {
+      throw new Error("Only image files can be uploaded.");
+    }
+
+    if (image.size > 5 * 1024 * 1024) {
+      throw new Error("Please upload an image smaller than 5MB.");
+    }
+
+    const buffer = Buffer.from(await image.arrayBuffer());
+    imageData = `data:${image.type};base64,${buffer.toString("base64")}`;
+  }
+
+  const existingRecord = await prisma.seasonKeyMemberProfile.findUnique({
+    where: {
+      season_roleKey: {
+        season: currentSeason,
+        roleKey,
+      },
+    },
+    select: {
+      id: true,
+      imageData: true,
+      sortOrder: true,
+    },
+  });
+
+  await prisma.seasonKeyMemberProfile.upsert({
+    where: {
+      season_roleKey: {
+        season: currentSeason,
+        roleKey,
+      },
+    },
+    update: {
+      roleLabel,
+      memberName,
+      imageData: imageData ?? existingRecord?.imageData ?? null,
+    },
+    create: {
+      season: currentSeason,
+      roleKey,
+      roleLabel,
+      memberName,
+      imageData: imageData ?? null,
+      sortOrder: existingRecord?.sortOrder ?? 0,
+    },
+  });
+
+  revalidatePath("/updates");
   revalidatePath("/portal/captain");
 }
 

@@ -1,4 +1,8 @@
 import type { Metadata } from "next";
+import Image from "next/image";
+import { currentSeason, seasonKeyMembers } from "@/lib/key-members-data";
+import { prisma } from "@/lib/prisma";
+
 export const metadata: Metadata = {
   title: "Updates",
   description: "Latest notices, announcements, and season updates.",
@@ -22,14 +26,6 @@ const updates = [
   },
 ];
 
-const keyMembers = [
-  { role: "Captain", name: "Stuart" },
-  { role: "Vice Captain", name: "Dougie" },
-  { role: "Treasurer", name: "Deek" },
-  { role: "Secretary", name: "Gregg" },
-  { role: "Handicap Committee", name: "Ryan & JK" },
-];
-
 function getInitials(name: string) {
   return name
     .split(/[&\s]+/)
@@ -39,7 +35,40 @@ function getInitials(name: string) {
     .join("");
 }
 
-export default function UpdatesPage() {
+type SeasonKeyMemberProfile = {
+  roleKey: string;
+  roleLabel: string;
+  memberName: string;
+  imageData: string | null;
+  sortOrder: number;
+};
+
+export default async function UpdatesPage() {
+  const savedProfiles: SeasonKeyMemberProfile[] = await prisma.seasonKeyMemberProfile.findMany({
+    where: {
+      season: currentSeason,
+    },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    select: {
+      roleKey: true,
+      roleLabel: true,
+      memberName: true,
+      imageData: true,
+      sortOrder: true,
+    },
+  });
+  const keyMembers = seasonKeyMembers.map((entry) => {
+    const savedProfile = savedProfiles.find((profile) => profile.roleKey === entry.roleKey);
+
+    return {
+      roleKey: entry.roleKey,
+      role: savedProfile?.roleLabel ?? entry.roleLabel,
+      name: savedProfile?.memberName ?? entry.memberName,
+      imageData: savedProfile?.imageData ?? null,
+      sortOrder: savedProfile?.sortOrder ?? entry.sortOrder,
+    };
+  });
+
   return (
     <main className="pb-8 sm:pb-12">
       <section className="bg-[var(--brand-dark)] px-4 py-8 text-stone-50 sm:px-6 sm:py-10">
@@ -61,7 +90,7 @@ export default function UpdatesPage() {
       <section className="mx-auto mt-6 max-w-6xl px-4 sm:mt-8 sm:px-6">
         <div className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand)]">
-            Season 2026
+            Season {currentSeason}
           </p>
           <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)] sm:text-3xl">
             Key members for the season ahead
@@ -74,11 +103,22 @@ export default function UpdatesPage() {
           <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-8">
             {keyMembers.map((member) => (
               <article
-                key={member.role}
+                key={member.roleKey}
                 className="flex flex-col items-center text-center"
               >
                 <div className="flex h-28 w-28 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-strong)] text-2xl font-semibold tracking-[0.08em] text-[var(--brand-dark)] shadow-sm sm:h-32 sm:w-32">
-                  {getInitials(member.name)}
+                  {member.imageData ? (
+                    <Image
+                      src={member.imageData}
+                      alt={member.name}
+                      width={128}
+                      height={128}
+                      unoptimized
+                      className="h-full w-full rounded-full object-cover"
+                    />
+                  ) : (
+                    getInitials(member.name)
+                  )}
                 </div>
                 <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--brand)]">
                   {member.role}

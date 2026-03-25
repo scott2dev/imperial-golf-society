@@ -16,6 +16,7 @@ import {
   reassignMemberEmailLink,
   reorderAboutCarouselImage,
   seedDemoMemberHistory,
+  upsertSeasonKeyMemberProfile,
   updateMemberHandicap,
   updateCourse,
   updateMemberRole,
@@ -27,6 +28,7 @@ import { ConfirmActionModal } from "@/components/admin/ConfirmActionModal";
 import OutingGroupsEditor from "@/components/captain/OutingGroupsEditor";
 import { requireCaptain } from "@/lib/auth";
 import { defaultParForHole } from "@/lib/course-defaults";
+import { currentSeason, seasonKeyMembers } from "@/lib/key-members-data";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
@@ -114,17 +116,28 @@ type WallOfShameAdminImage = {
   sortOrder: number;
 };
 
+type SeasonKeyMemberProfile = {
+  id: string;
+  season: number;
+  roleKey: string;
+  roleLabel: string;
+  memberName: string;
+  imageData: string | null;
+  sortOrder: number;
+};
+
 export default async function CaptainPage({ searchParams }: CaptainPageProps) {
   const captain = await requireCaptain();
   const isAdmin = captain.user.role === "admin";
 
-  const [courses, members, outings, pendingMembers, aboutCarouselImages, wallOfShameImages, params]: [
+  const [courses, members, outings, pendingMembers, aboutCarouselImages, wallOfShameImages, keyMemberProfiles, params]: [
     CaptainCourse[],
     CaptainMember[],
     CaptainOuting[],
     CaptainMember[],
     AboutCarouselAdminImage[],
     WallOfShameAdminImage[],
+    SeasonKeyMemberProfile[],
     Awaited<CaptainPageProps["searchParams"]>,
   ] = await Promise.all([
     prisma.course.findMany({
@@ -168,8 +181,26 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
     prisma.wallOfShameImage.findMany({
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     }),
+    prisma.seasonKeyMemberProfile.findMany({
+      where: {
+        season: currentSeason,
+      },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    }),
     searchParams,
   ]);
+
+  const seasonLeadership = seasonKeyMembers.map((entry) => {
+    const savedProfile = keyMemberProfiles.find((profile) => profile.roleKey === entry.roleKey);
+
+    return {
+      roleKey: entry.roleKey,
+      roleLabel: savedProfile?.roleLabel ?? entry.roleLabel,
+      memberName: savedProfile?.memberName ?? entry.memberName,
+      imageData: savedProfile?.imageData ?? null,
+      sortOrder: savedProfile?.sortOrder ?? entry.sortOrder,
+    };
+  });
 
   return (
     <main className="pb-8 sm:pb-12">
@@ -486,6 +517,112 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                   confirmWord="REMOVE"
                 />
               </article>
+            </div>
+          </details>
+        </section>
+      ) : null}
+
+      {isAdmin ? (
+        <section className="mx-auto mt-6 max-w-6xl px-4 sm:px-6">
+          <details className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
+            <summary className="cursor-pointer list-none">
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand)]">
+                  Season Leadership
+                </p>
+                <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-800">
+                  Visible to admin only
+                </span>
+              </div>
+              <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)]">
+                Manage key members for {currentSeason}
+              </h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Update the role titles, member names, and circular profile images shown on the Updates page.
+              </p>
+            </summary>
+
+            <div className="mt-6 grid gap-4 lg:grid-cols-2">
+              {seasonLeadership.map((profile) => (
+                <form
+                  key={profile.roleKey}
+                  action={upsertSeasonKeyMemberProfile}
+                  className="rounded-[1.5rem] bg-[var(--surface-strong)] px-5 py-5"
+                >
+                  <input type="hidden" name="roleKey" value={profile.roleKey} />
+                  <div className="flex items-start gap-4">
+                    <div className="overflow-hidden rounded-full border border-[var(--border)] bg-white">
+                      {profile.imageData ? (
+                        <img
+                          src={profile.imageData}
+                          alt={profile.memberName}
+                          className="h-20 w-20 object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-20 w-20 items-center justify-center bg-[var(--surface)] text-lg font-semibold text-[var(--brand-dark)]">
+                          {profile.memberName
+                            .split(/[&\s]+/)
+                            .filter(Boolean)
+                            .slice(0, 2)
+                            .map((part) => part[0]?.toUpperCase() ?? "")
+                            .join("")}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-lg font-semibold text-[var(--brand-dark)]">
+                        {profile.roleLabel}
+                      </p>
+                      <p className="mt-1 text-sm text-slate-600">
+                        Save a new name, role title, or image for this season card.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid gap-4">
+                    <label className="text-sm font-semibold text-[var(--brand-dark)]">
+                      Role title
+                      <input
+                        type="text"
+                        name="roleLabel"
+                        required
+                        maxLength={80}
+                        defaultValue={profile.roleLabel}
+                        className="mt-2 w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[var(--brand)]"
+                      />
+                    </label>
+
+                    <label className="text-sm font-semibold text-[var(--brand-dark)]">
+                      Member name
+                      <input
+                        type="text"
+                        name="memberName"
+                        required
+                        maxLength={120}
+                        defaultValue={profile.memberName}
+                        className="mt-2 w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[var(--brand)]"
+                      />
+                    </label>
+
+                    <label className="text-sm font-semibold text-[var(--brand-dark)]">
+                      Profile image
+                      <input
+                        type="file"
+                        name="image"
+                        accept="image/*"
+                        className="mt-2 block w-full text-sm text-slate-700 file:mr-4 file:rounded-full file:border-0 file:bg-[var(--brand)] file:px-4 file:py-2 file:font-semibold file:text-white"
+                      />
+                    </label>
+
+                    <button
+                      type="submit"
+                      className="inline-flex min-h-10 items-center justify-center rounded-full bg-[var(--brand)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+                    >
+                      Save role card
+                    </button>
+                  </div>
+                </form>
+              ))}
             </div>
           </details>
         </section>
