@@ -281,6 +281,14 @@ export default async function MembersPage() {
     ...createEmptyPrizeTotals(),
     ...prizeTotalsByMember.get(member.id),
   }));
+  const shadedColumnKeys = new Set<PrizeColumnKey>([
+    "firstPrize",
+    "thirdPrize",
+    "bestBackNine",
+    "nearestToPin",
+    "longestDrive",
+    "numptyPrize",
+  ]);
 
   return (
     <main className="pb-8 sm:pb-12">
@@ -325,9 +333,16 @@ export default async function MembersPage() {
                 <th className="sticky left-0 z-20 bg-[var(--surface-strong)] px-4 py-4 font-semibold">
                   Member
                 </th>
-                <th className="px-4 py-4 font-semibold">Handicap</th>
+                <th className="bg-white px-4 py-4 font-semibold">Handicap</th>
                 {prizeColumns.map((column) => (
-                  <th key={column.key} className="px-4 py-4 font-semibold">
+                  <th
+                    key={column.key}
+                    className={`px-4 py-4 font-semibold ${
+                      shadedColumnKeys.has(column.key)
+                        ? "bg-[var(--surface)]"
+                        : "bg-white"
+                    }`}
+                  >
                     {column.label}
                   </th>
                 ))}
@@ -349,9 +364,16 @@ export default async function MembersPage() {
                     <td className="sticky left-0 z-10 bg-[var(--surface)] px-4 py-4 font-medium text-[var(--brand-dark)]">
                       {member.name}
                     </td>
-                    <td className="px-4 py-4 text-slate-700">{member.handicap}</td>
+                    <td className="bg-white px-4 py-4 text-slate-700">{member.handicap}</td>
                     {prizeColumns.map((column) => (
-                      <td key={column.key} className="px-4 py-4 text-slate-700">
+                      <td
+                        key={column.key}
+                        className={`px-4 py-4 text-slate-700 ${
+                          shadedColumnKeys.has(column.key)
+                            ? "bg-[var(--surface)]"
+                            : "bg-white"
+                        }`}
+                      >
                         {member[column.key]}
                       </td>
                     ))}
