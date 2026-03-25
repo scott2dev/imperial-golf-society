@@ -21,7 +21,7 @@ export default async function AboutPage() {
     {
       id: "imperial-bar-default",
       imageSrc: "/imperialbarold.jpg",
-      tagline: "Imperial Bar remains at the heart of the society in Bangor.",
+      tagline: "Imperial Bar remains at the heart of the society.",
     },
     ...storedCarouselImages.map((image) => ({
       id: image.id,
