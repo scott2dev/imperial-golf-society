@@ -1,12 +1,35 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import AboutImageCarousel from "@/components/about/AboutImageCarousel";
+import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "About",
   description: "About Imperial Golf Society and its purpose.",
 };
 
-export default function AboutPage() {
+type AboutCarouselImage = {
+  id: string;
+  imageData: string;
+  tagline: string;
+};
+
+export default async function AboutPage() {
+  const storedCarouselImages: AboutCarouselImage[] = await prisma.aboutCarouselImage.findMany({
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+  });
+  const carouselSlides = [
+    {
+      id: "imperial-bar-default",
+      imageSrc: "/imperialbarold.jpg",
+      tagline: "Imperial Bar remains at the heart of the society in Bangor.",
+    },
+    ...storedCarouselImages.map((image) => ({
+      id: image.id,
+      imageSrc: image.imageData,
+      tagline: image.tagline,
+    })),
+  ];
+
   return (
     <main className="pb-8 sm:pb-12">
       <section className="bg-[var(--brand-dark)] px-4 py-8 text-stone-50 sm:px-6 sm:py-10">
@@ -17,15 +40,8 @@ export default function AboutPage() {
           <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">
             About Imperial Golf Society
           </h1>
-          <div className="mt-6 overflow-hidden rounded-[1.5rem]">
-            <Image
-              src="/imperialbarold.jpg"
-              alt="Imperial Bar in Bangor"
-              width={1600}
-              height={900}
-              className="h-auto w-full object-cover"
-              priority
-            />
+          <div className="mt-6">
+            <AboutImageCarousel slides={carouselSlides} />
           </div>
           <p className="mt-6 text-sm leading-7 text-stone-100/85 sm:text-base">
             Imperial Golf Society is associated with Imperial Bar in Bangor,
