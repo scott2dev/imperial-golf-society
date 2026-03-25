@@ -71,7 +71,7 @@ export default function UpdatesPage() {
             and keep things running smoothly from the first outing to Captain&apos;s Weekend.
           </p>
 
-          <div className="mt-8 grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-8">
             {keyMembers.map((member) => (
               <article
                 key={member.role}
