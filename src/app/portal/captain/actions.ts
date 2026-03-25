@@ -874,6 +874,17 @@ export async function upsertSeasonKeyMemberProfile(formData: FormData) {
       sortOrder: true,
     },
   });
+  const highestSortOrder = await prisma.seasonKeyMemberProfile.findFirst({
+    where: {
+      season: currentSeason,
+    },
+    orderBy: {
+      sortOrder: "desc",
+    },
+    select: {
+      sortOrder: true,
+    },
+  });
 
   await prisma.seasonKeyMemberProfile.upsert({
     where: {
@@ -893,7 +904,7 @@ export async function upsertSeasonKeyMemberProfile(formData: FormData) {
       roleLabel,
       memberName,
       imageData: imageData ?? null,
-      sortOrder: existingRecord?.sortOrder ?? 0,
+      sortOrder: existingRecord?.sortOrder ?? (highestSortOrder?.sortOrder ?? -1) + 1,
     },
   });
 
