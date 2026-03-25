@@ -98,6 +98,12 @@ export default async function PortalPage() {
                 </dd>
               </div>
             </dl>
+            <Link
+              href="/portal/profile"
+              className="mt-6 inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface-strong)]"
+            >
+              Open full profile
+            </Link>
           </article>
 
           <aside className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">

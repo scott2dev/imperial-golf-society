@@ -88,6 +88,20 @@ function mapMemberRecord(record: {
   } satisfies MemberRecord;
 }
 
+async function recordHandicapHistory(
+  memberId: string,
+  handicapIndex: number,
+  reason?: string,
+) {
+  await prisma.memberHandicapHistory.create({
+    data: {
+      memberId,
+      handicapIndex,
+      reason: reason || null,
+    },
+  });
+}
+
 export function isEmailAllowedToSignIn(email: string) {
   const allowList = getAllowedMemberEmails();
 
@@ -265,6 +279,8 @@ export async function createPendingMemberRequest(input: {
       },
     });
 
+    await recordHandicapHistory(record.id, input.handicapIndex, "signup request");
+
     return mapMemberRecord(record);
   }
 
@@ -280,6 +296,8 @@ export async function createPendingMemberRequest(input: {
       lastLoginAt: now,
     },
   });
+
+  await recordHandicapHistory(record.id, input.handicapIndex, "signup request");
 
   return mapMemberRecord(record);
 }
@@ -306,6 +324,8 @@ export async function updateMemberHandicap(memberId: string, handicapIndex: numb
       handicapIndex,
     },
   });
+
+  await recordHandicapHistory(memberId, handicapIndex, "admin update");
 
   return mapMemberRecord(record);
 }

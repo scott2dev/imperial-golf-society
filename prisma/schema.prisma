@@ -25,22 +25,35 @@ enum OutingStatus {
 }
 
 model Member {
-  id             String               @id @default(cuid())
-  email          String?              @unique
-  name           String               @unique
-  image          String?
-  role           MemberRole           @default(member)
-  approvalStatus MemberApprovalStatus @default(approved)
-  isRegistered   Boolean              @default(false)
-  handicapIndex  Decimal              @default(0) @db.Decimal(5, 1)
-  createdAt      DateTime             @default(now())
-  updatedAt      DateTime             @updatedAt
-  lastLoginAt    DateTime             @default(now())
-  outingPlayers  OutingPlayer[]
-  enteredScores  HoleScore[]          @relation("ScoresEnteredBy")
-  holeScores     HoleScore[]          @relation("PlayerHoleScores")
-  outingResults  OutingResult[]
+  id               String                 @id @default(cuid())
+  email            String?                @unique
+  name             String                 @unique
+  image            String?
+  role             MemberRole             @default(member)
+  approvalStatus   MemberApprovalStatus   @default(approved)
+  isRegistered     Boolean                @default(false)
+  handicapIndex    Decimal                @default(0) @db.Decimal(5, 1)
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  lastLoginAt      DateTime               @default(now())
+  outingPlayers    OutingPlayer[]
+  enteredScores    HoleScore[]            @relation("ScoresEnteredBy")
+  holeScores       HoleScore[]            @relation("PlayerHoleScores")
+  outingResults    OutingResult[]
   outingSignatures OutingSignature[]
+  handicapHistory  MemberHandicapHistory[]
+}
+
+model MemberHandicapHistory {
+  id            String   @id @default(cuid())
+  memberId      String
+  handicapIndex Decimal  @db.Decimal(5, 1)
+  reason        String?
+  effectiveAt   DateTime @default(now())
+  createdAt     DateTime @default(now())
+  member        Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId, effectiveAt])
 }
 
 model Course {
