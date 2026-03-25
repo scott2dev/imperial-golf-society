@@ -90,7 +90,7 @@ export default async function AboutPage() {
             information about the society, use the contact details below.
           </p>
 
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <div className="mt-6">
             <div className="min-w-0 rounded-[1.5rem] bg-[var(--surface-strong)] p-5 ring-1 ring-[var(--border)]">
               <p className="text-sm font-medium text-slate-500">Email</p>
               <a
@@ -99,14 +99,6 @@ export default async function AboutPage() {
               >
                 contact@imperialgolfsociety.co.uk
               </a>
-            </div>
-            <div className="min-w-0 rounded-[1.5rem] bg-[var(--surface-strong)] p-5 ring-1 ring-[var(--border)]">
-              <p className="text-sm font-medium text-slate-500">Membership</p>
-              <p className="mt-2 text-sm leading-7 text-slate-700">
-                Annual membership is {"\u00A3"}30, and the society welcomes golfers
-                of all standards who enjoy the balance of competitive golf and a
-                strong social side.
-              </p>
             </div>
           </div>
         </div>
