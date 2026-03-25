@@ -15,7 +15,7 @@ import {
 } from "@/lib/member-store";
 import { members as sourceMembers } from "@/lib/members-data";
 import { prisma } from "@/lib/prisma";
-import { calculateStablefordHoleScore } from "@/lib/scoring";
+import { calculateStablefordHoleScore, getStrokesReceivedForHole } from "@/lib/scoring";
 
 const DEMO_SPONSOR_FLAG = "__DEMO_SEED__";
 const DEMO_COURSE_NAME = "[Demo] Imperial Society Course";
@@ -81,13 +81,35 @@ function getDemoGrossStrokes(input: {
   outingIndex: number;
   memberIndex: number;
   handicapIndex: number;
+  strokeIndex: number;
+  twosAssigned: number;
 }) {
-  const variancePattern = [-2, -1, -1, 0, 0, 0, 1, 1, 2, 2];
-  const hash = (input.outingIndex * 17 + input.memberIndex * 11 + input.holeNumber * 5) % 10;
-  const handicapBias = Math.floor(input.handicapIndex / 20);
-  const grossStrokes = input.par + variancePattern[hash] + handicapBias;
+  const strokesReceived = getStrokesReceivedForHole(
+    input.handicapIndex,
+    input.strokeIndex,
+  );
+  const hash = (input.outingIndex * 17 + input.memberIndex * 11 + input.holeNumber * 5) % 18;
+  const targetPointsPattern = [1, 2, 2, 1, 2, 2, 2, 1, 2, 2, 3, 1, 2, 0, 2, 1, 2, 3];
+  const formBoost = (input.outingIndex + input.memberIndex) % 6 === 0 ? 1 : 0;
+  const formDrop =
+    (input.outingIndex * 3 + input.memberIndex + input.holeNumber) % 8 === 0 ? 1 : 0;
+  const rareTwoTrigger =
+    input.par === 3 &&
+    input.twosAssigned < 2 &&
+    (input.outingIndex * 13 + input.memberIndex * 7 + input.holeNumber * 3) % 37 === 0;
 
-  return clamp(grossStrokes, 1, input.par + 4);
+  if (rareTwoTrigger) {
+    return 2;
+  }
+
+  const targetStablefordPoints = clamp(
+    targetPointsPattern[hash] + formBoost - formDrop,
+    0,
+    input.par === 3 ? 3 : 4,
+  );
+  const grossStrokes = input.par + 2 - targetStablefordPoints + strokesReceived;
+
+  return clamp(grossStrokes, 2, input.par + 5);
 }
 
 async function removeSeededDemoDataInternal() {
@@ -419,15 +441,27 @@ export async function seedDemoMemberHistory(_formData: FormData) {
       courseHandicap: Number(member.handicapIndex),
       playingHandicap: Number(member.handicapIndex),
     }));
+    const holeScores: Array<{
+      memberId: string;
+      holeNumber: number;
+      grossStrokes: number;
+      strokesReceived: number;
+      netStrokes: number;
+      stablefordPoints: number;
+      enteredByMemberId: string;
+    }> = [];
+    let twosAssigned = 0;
 
-    const holeScores = members.flatMap((member, memberIndex) =>
-      demoCourse.holes.map((hole) => {
+    for (const [memberIndex, member] of members.entries()) {
+      for (const hole of demoCourse.holes) {
         const grossStrokes = getDemoGrossStrokes({
           par: hole.par,
           holeNumber: hole.holeNumber,
           outingIndex,
           memberIndex,
           handicapIndex: Number(member.handicapIndex),
+          strokeIndex: hole.strokeIndex,
+          twosAssigned,
         });
         const calculated = calculateStablefordHoleScore({
           grossStrokes,
@@ -436,7 +470,11 @@ export async function seedDemoMemberHistory(_formData: FormData) {
           playingHandicap: Number(member.handicapIndex),
         });
 
-        return {
+        if (grossStrokes === 2) {
+          twosAssigned += 1;
+        }
+
+        holeScores.push({
           memberId: member.id,
           holeNumber: hole.holeNumber,
           grossStrokes,
@@ -444,9 +482,9 @@ export async function seedDemoMemberHistory(_formData: FormData) {
           netStrokes: calculated.netStrokes,
           stablefordPoints: calculated.stablefordPoints,
           enteredByMemberId: members[Math.floor(memberIndex / 4) * 4]?.id ?? member.id,
-        };
-      }),
-    );
+        });
+      }
+    }
 
     const leaderboard = members
       .map((member) => {
