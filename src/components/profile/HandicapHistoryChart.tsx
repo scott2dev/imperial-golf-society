@@ -17,10 +17,10 @@ export function HandicapHistoryChart({ points }: HandicapHistoryChartProps) {
     );
   }
 
-  const width = 720;
-  const height = 240;
-  const paddingLeft = 40;
-  const paddingRight = 24;
+  const width = 520;
+  const height = 220;
+  const paddingLeft = 34;
+  const paddingRight = 16;
   const paddingTop = 20;
   const paddingBottom = 42;
   const plotWidth = width - paddingLeft - paddingRight;
@@ -54,7 +54,7 @@ export function HandicapHistoryChart({ points }: HandicapHistoryChartProps) {
       <div className="overflow-x-auto">
         <svg
           viewBox={`0 0 ${width} ${height}`}
-          className="min-w-[640px]"
+          className="h-auto w-full"
           role="img"
           aria-label="Handicap history line chart"
         >
