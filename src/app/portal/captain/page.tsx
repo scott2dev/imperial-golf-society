@@ -12,6 +12,7 @@ import {
   removeSeededDemoData,
   removeMemberRequest,
   reassignMemberEmailLink,
+  reorderAboutCarouselImage,
   seedDemoMemberHistory,
   updateMemberHandicap,
   updateCourse,
@@ -545,7 +546,7 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                       No uploaded carousel images yet. The default Imperial Bar image will be shown until you add one.
                     </p>
                   ) : (
-                    aboutCarouselImages.map((image) => (
+                    aboutCarouselImages.map((image, index) => (
                       <article
                         key={image.id}
                         className="rounded-[1.25rem] border border-[var(--border)] bg-white/75 p-4"
@@ -563,7 +564,29 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                         <p className="mt-1 text-xs uppercase tracking-[0.14em] text-slate-500">
                           Slide {image.sortOrder + 1}
                         </p>
-                        <div className="mt-4">
+                        <div className="mt-4 flex flex-wrap gap-3">
+                          <form action={reorderAboutCarouselImage}>
+                            <input type="hidden" name="imageId" value={image.id} />
+                            <input type="hidden" name="direction" value="up" />
+                            <button
+                              type="submit"
+                              disabled={index === 0}
+                              className="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface-strong)] disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                              Move up
+                            </button>
+                          </form>
+                          <form action={reorderAboutCarouselImage}>
+                            <input type="hidden" name="imageId" value={image.id} />
+                            <input type="hidden" name="direction" value="down" />
+                            <button
+                              type="submit"
+                              disabled={index === aboutCarouselImages.length - 1}
+                              className="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface-strong)] disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                              Move down
+                            </button>
+                          </form>
                           <ConfirmActionModal
                             action={deleteAboutCarouselImage}
                             buttonLabel="Delete image"

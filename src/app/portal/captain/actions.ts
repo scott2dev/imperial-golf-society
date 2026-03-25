@@ -636,6 +636,83 @@ export async function deleteAboutCarouselImage(formData: FormData) {
   revalidatePath("/portal/captain");
 }
 
+export async function reorderAboutCarouselImage(formData: FormData) {
+  await requireAdmin();
+
+  const imageId = getTrimmedString(formData, "imageId");
+  const direction = getTrimmedString(formData, "direction");
+
+  if (!imageId) {
+    throw new Error("Image id is required.");
+  }
+
+  if (direction !== "up" && direction !== "down") {
+    throw new Error("A valid reorder direction is required.");
+  }
+
+  const currentImage = await prisma.aboutCarouselImage.findUnique({
+    where: {
+      id: imageId,
+    },
+    select: {
+      id: true,
+      sortOrder: true,
+    },
+  });
+
+  if (!currentImage) {
+    throw new Error("That carousel image could not be found.");
+  }
+
+  const adjacentImage = await prisma.aboutCarouselImage.findFirst({
+    where:
+      direction === "up"
+        ? {
+            sortOrder: {
+              lt: currentImage.sortOrder,
+            },
+          }
+        : {
+            sortOrder: {
+              gt: currentImage.sortOrder,
+            },
+          },
+    orderBy: {
+      sortOrder: direction === "up" ? "desc" : "asc",
+    },
+    select: {
+      id: true,
+      sortOrder: true,
+    },
+  });
+
+  if (!adjacentImage) {
+    return;
+  }
+
+  await prisma.$transaction([
+    prisma.aboutCarouselImage.update({
+      where: {
+        id: currentImage.id,
+      },
+      data: {
+        sortOrder: adjacentImage.sortOrder,
+      },
+    }),
+    prisma.aboutCarouselImage.update({
+      where: {
+        id: adjacentImage.id,
+      },
+      data: {
+        sortOrder: currentImage.sortOrder,
+      },
+    }),
+  ]);
+
+  revalidatePath("/about");
+  revalidatePath("/portal/captain");
+}
+
 export async function createOuting(formData: FormData) {
   const captain = await requireCaptain();
   const title = getTrimmedString(formData, "title");
