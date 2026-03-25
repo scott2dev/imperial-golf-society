@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-
 export const metadata: Metadata = {
   title: "Updates",
   description: "Latest notices, announcements, and season updates.",
@@ -32,6 +30,15 @@ const keyMembers = [
   { role: "Handicap Committee", name: "Ryan & JK" },
 ];
 
+function getInitials(name: string) {
+  return name
+    .split(/[&\s]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
 export default function UpdatesPage() {
   return (
     <main className="pb-8 sm:pb-12">
@@ -52,44 +59,35 @@ export default function UpdatesPage() {
       </section>
 
       <section className="mx-auto mt-6 max-w-6xl px-4 sm:mt-8 sm:px-6">
-        <div className="grid gap-6 overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] shadow-sm lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="p-6 sm:p-8">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand)]">
-              Season 2026
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)] sm:text-3xl">
-              Key members for the season ahead
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-700 sm:text-base">
-              The society team helping guide the 2026 season, organise the calendar,
-              and keep things running smoothly from the first outing to Captain&apos;s Weekend.
-            </p>
+        <div className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand)]">
+            Season 2026
+          </p>
+          <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)] sm:text-3xl">
+            Key members for the season ahead
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-700 sm:text-base">
+            The society team helping guide the 2026 season, organise the calendar,
+            and keep things running smoothly from the first outing to Captain&apos;s Weekend.
+          </p>
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              {keyMembers.map((member) => (
-                <article
-                  key={member.role}
-                  className="rounded-[1.5rem] bg-[var(--surface-strong)] px-4 py-4"
-                >
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--brand)]">
-                    {member.role}
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-[var(--brand-dark)]">
-                    {member.name}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </div>
-
-          <div className="relative min-h-[320px] lg:min-h-full">
-            <Image
-              src="/captainsweekend.jpg"
-              alt="Imperial Golf Society members during Captain's Weekend"
-              fill
-              className="object-cover"
-              sizes="(max-width: 1024px) 100vw, 40vw"
-            />
+          <div className="mt-8 grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+            {keyMembers.map((member) => (
+              <article
+                key={member.role}
+                className="flex flex-col items-center text-center"
+              >
+                <div className="flex h-28 w-28 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-strong)] text-2xl font-semibold tracking-[0.08em] text-[var(--brand-dark)] shadow-sm sm:h-32 sm:w-32">
+                  {getInitials(member.name)}
+                </div>
+                <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--brand)]">
+                  {member.role}
+                </p>
+                <p className="mt-2 text-lg font-semibold text-[var(--brand-dark)]">
+                  {member.name}
+                </p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
