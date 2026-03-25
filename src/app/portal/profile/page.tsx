@@ -266,7 +266,7 @@ export default async function ProfilePage() {
                   return (
                     <article
                       key={outing.id}
-                      className="w-[34rem] max-w-[calc(100vw-4rem)] shrink-0 snap-start rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface-strong)] p-5 sm:max-w-[calc(100vw-6rem)]"
+                      className="min-w-full snap-start rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface-strong)] p-5"
                     >
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
