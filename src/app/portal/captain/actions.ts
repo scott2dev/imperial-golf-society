@@ -15,6 +15,11 @@ import {
 } from "@/lib/member-store";
 import { members as sourceMembers } from "@/lib/members-data";
 import { prisma } from "@/lib/prisma";
+import { calculateStablefordHoleScore } from "@/lib/scoring";
+
+const DEMO_SPONSOR_FLAG = "__DEMO_SEED__";
+const DEMO_COURSE_NAME = "[Demo] Imperial Society Course";
+const DEMO_HISTORY_REASON_PREFIX = "demo seed";
 
 function getTrimmedString(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -37,6 +42,84 @@ function getNumberValue(formData: FormData, key: string) {
   }
 
   return value;
+}
+
+function roundToSingleDecimal(value: number) {
+  return Math.round(value * 10) / 10;
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function getDemoOutingDate(index: number) {
+  const outingDate = new Date();
+  outingDate.setHours(12, 0, 0, 0);
+  outingDate.setDate(14);
+  outingDate.setMonth(outingDate.getMonth() - (9 - index));
+
+  return outingDate;
+}
+
+function getDemoHistoryValue(currentHandicap: number, outingIndex: number, memberIndex: number) {
+  const offsets = [-1.4, -0.9, -0.5, -0.1, 0.4, 0.8, 0.6, 0.3, 0.1, 0];
+  const direction = memberIndex % 2 === 0 ? 1 : -1;
+  const memberVariation = ((memberIndex % 4) - 1.5) * 0.2;
+
+  if (outingIndex === offsets.length - 1) {
+    return roundToSingleDecimal(currentHandicap);
+  }
+
+  return roundToSingleDecimal(
+    clamp(currentHandicap + direction * offsets[outingIndex] + memberVariation, 0, 54),
+  );
+}
+
+function getDemoGrossStrokes(input: {
+  par: number;
+  holeNumber: number;
+  outingIndex: number;
+  memberIndex: number;
+  handicapIndex: number;
+}) {
+  const variancePattern = [-2, -1, -1, 0, 0, 0, 1, 1, 2, 2];
+  const hash = (input.outingIndex * 17 + input.memberIndex * 11 + input.holeNumber * 5) % 10;
+  const handicapBias = Math.floor(input.handicapIndex / 20);
+  const grossStrokes = input.par + variancePattern[hash] + handicapBias;
+
+  return clamp(grossStrokes, 1, input.par + 4);
+}
+
+async function removeSeededDemoDataInternal() {
+  await prisma.outing.deleteMany({
+    where: {
+      sponsorName: DEMO_SPONSOR_FLAG,
+    },
+  });
+
+  await prisma.memberHandicapHistory.deleteMany({
+    where: {
+      reason: {
+        startsWith: DEMO_HISTORY_REASON_PREFIX,
+      },
+    },
+  });
+
+  const remainingDemoOutings = await prisma.outing.count({
+    where: {
+      course: {
+        name: DEMO_COURSE_NAME,
+      },
+    },
+  });
+
+  if (remainingDemoOutings === 0) {
+    await prisma.course.deleteMany({
+      where: {
+        name: DEMO_COURSE_NAME,
+      },
+    });
+  }
 }
 
 export async function createCourse(formData: FormData) {
@@ -235,6 +318,217 @@ export async function updateCourse(formData: FormData) {
   });
 
   revalidatePath("/portal/captain");
+  revalidatePath("/fixtures");
+}
+
+export async function seedDemoMemberHistory(_formData: FormData) {
+  await requireAdmin();
+
+  await removeSeededDemoDataInternal();
+
+  const members = await prisma.member.findMany({
+    where: {
+      approvalStatus: "approved",
+    },
+    orderBy: {
+      name: "asc",
+    },
+    select: {
+      id: true,
+      name: true,
+      handicapIndex: true,
+    },
+  });
+
+  if (members.length === 0) {
+    throw new Error("There are no approved members to seed.");
+  }
+
+  let demoCourse = await prisma.course.findUnique({
+    where: {
+      name: DEMO_COURSE_NAME,
+    },
+    include: {
+      holes: {
+        orderBy: {
+          holeNumber: "asc",
+        },
+      },
+    },
+  });
+
+  if (!demoCourse) {
+    demoCourse = await prisma.course.create({
+      data: {
+        name: DEMO_COURSE_NAME,
+        holes: {
+          create: createPlaceholderHoleSetup(),
+        },
+      },
+      include: {
+        holes: {
+          orderBy: {
+            holeNumber: "asc",
+          },
+        },
+      },
+    });
+  }
+
+  if (demoCourse.holes.length !== 18) {
+    demoCourse = await prisma.course.update({
+      where: {
+        id: demoCourse.id,
+      },
+      data: {
+        holes: {
+          deleteMany: {},
+          create: createPlaceholderHoleSetup(),
+        },
+      },
+      include: {
+        holes: {
+          orderBy: {
+            holeNumber: "asc",
+          },
+        },
+      },
+    });
+  }
+
+  for (const [memberIndex, member] of members.entries()) {
+    for (let outingIndex = 0; outingIndex < 10; outingIndex += 1) {
+      await prisma.memberHandicapHistory.create({
+        data: {
+          memberId: member.id,
+          handicapIndex: getDemoHistoryValue(Number(member.handicapIndex), outingIndex, memberIndex),
+          reason: `${DEMO_HISTORY_REASON_PREFIX}:${outingIndex + 1}`,
+          effectiveAt: getDemoOutingDate(outingIndex),
+        },
+      });
+    }
+  }
+
+  for (let outingIndex = 0; outingIndex < 10; outingIndex += 1) {
+    const outingDate = getDemoOutingDate(outingIndex);
+    const playerAssignments = members.map((member, memberIndex) => ({
+      memberId: member.id,
+      groupNumber: Math.floor(memberIndex / 4) + 1,
+      isScorekeeper: memberIndex % 4 === 0,
+      submittedAt: outingDate,
+      courseHandicap: Number(member.handicapIndex),
+      playingHandicap: Number(member.handicapIndex),
+    }));
+
+    const holeScores = members.flatMap((member, memberIndex) =>
+      demoCourse.holes.map((hole) => {
+        const grossStrokes = getDemoGrossStrokes({
+          par: hole.par,
+          holeNumber: hole.holeNumber,
+          outingIndex,
+          memberIndex,
+          handicapIndex: Number(member.handicapIndex),
+        });
+        const calculated = calculateStablefordHoleScore({
+          grossStrokes,
+          par: hole.par,
+          strokeIndex: hole.strokeIndex,
+          playingHandicap: Number(member.handicapIndex),
+        });
+
+        return {
+          memberId: member.id,
+          holeNumber: hole.holeNumber,
+          grossStrokes,
+          strokesReceived: calculated.strokesReceived,
+          netStrokes: calculated.netStrokes,
+          stablefordPoints: calculated.stablefordPoints,
+          enteredByMemberId: members[Math.floor(memberIndex / 4) * 4]?.id ?? member.id,
+        };
+      }),
+    );
+
+    const leaderboard = members
+      .map((member) => {
+        const playerScores = holeScores.filter((score) => score.memberId === member.id);
+
+        return {
+          memberId: member.id,
+          totalPoints: playerScores.reduce(
+            (total, score) => total + score.stablefordPoints,
+            0,
+          ),
+          totalGross: playerScores.reduce((total, score) => total + score.grossStrokes, 0),
+        };
+      })
+      .sort(
+        (left, right) =>
+          right.totalPoints - left.totalPoints ||
+          left.totalGross - right.totalGross,
+      )
+      .map((entry, index) => ({
+        memberId: entry.memberId,
+        totalPoints: entry.totalPoints,
+        position: index + 1,
+      }));
+
+    const outing = await prisma.outing.create({
+      data: {
+        title: `Demo Society Day ${outingIndex + 1}`,
+        outingDate,
+        courseId: demoCourse.id,
+        teeTime: "10:00",
+        sponsorName: DEMO_SPONSOR_FLAG,
+        status: "completed",
+        resultsPublishedAt: outingDate,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    await prisma.outingPlayer.createMany({
+      data: playerAssignments.map((assignment) => ({
+        outingId: outing.id,
+        ...assignment,
+      })),
+    });
+
+    await prisma.holeScore.createMany({
+      data: holeScores.map((score) => ({
+        outingId: outing.id,
+        ...score,
+      })),
+    });
+
+    await prisma.outingResult.createMany({
+      data: leaderboard.map((result) => ({
+        outingId: outing.id,
+        memberId: result.memberId,
+        totalPoints: result.totalPoints,
+        position: result.position,
+      })),
+    });
+  }
+
+  revalidatePath("/portal");
+  revalidatePath("/portal/profile");
+  revalidatePath("/portal/captain");
+  revalidatePath("/results");
+  revalidatePath("/fixtures");
+}
+
+export async function removeSeededDemoData(formData: FormData) {
+  await requireAdmin();
+
+  assertConfirmationPhrase(formData, "REMOVE");
+
+  await removeSeededDemoDataInternal();
+
+  revalidatePath("/portal");
+  revalidatePath("/portal/profile");
+  revalidatePath("/portal/captain");
+  revalidatePath("/results");
   revalidatePath("/fixtures");
 }
 

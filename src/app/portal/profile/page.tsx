@@ -246,102 +246,104 @@ export default async function ProfilePage() {
             Your rounds and finishing positions
           </h2>
 
-          <div className="mt-6 grid gap-4">
+          <div className="mt-6 overflow-x-auto pb-2">
             {previousOutings.length === 0 ? (
               <p className="rounded-[1.5rem] bg-[var(--surface-strong)] px-4 py-4 text-sm text-slate-700">
                 Your past scorecards will appear here once you have completed an outing.
               </p>
             ) : (
-              previousOutings.map((outing) => {
-                const assignment = outing.players[0] ?? null;
-                const result = outing.outingResults[0] ?? null;
-                const totalPoints = outing.holeScores.reduce(
-                  (sum, score) => sum + score.stablefordPoints,
-                  0,
-                );
+              <div className="flex snap-x snap-mandatory gap-4">
+                {previousOutings.map((outing) => {
+                  const assignment = outing.players[0] ?? null;
+                  const result = outing.outingResults[0] ?? null;
+                  const totalPoints = outing.holeScores.reduce(
+                    (sum, score) => sum + score.stablefordPoints,
+                    0,
+                  );
 
-                return (
-                  <article
-                    key={outing.id}
-                    className="rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface-strong)] p-5"
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                      <div>
-                        <h3 className="text-xl font-semibold text-[var(--brand-dark)]">
-                          {outing.title}
-                        </h3>
-                        <p className="mt-1 text-sm text-slate-600">
-                          {new Date(outing.outingDate).toLocaleDateString("en-GB", {
-                            dateStyle: "medium",
-                          })}{" "}
-                          at {outing.course.name}
-                        </p>
-                      </div>
-                      <div className="grid gap-2 text-sm sm:text-right">
-                        <p className="font-semibold text-[var(--brand-dark)]">
-                          {result?.position ? `Finished ${result.position}${result.position === 1 ? "st" : result.position === 2 ? "nd" : result.position === 3 ? "rd" : "th"}` : "Finishing place not yet published"}
-                        </p>
-                        <p className="text-slate-600">
-                          {totalPoints} Stableford pts
-                        </p>
-                        {assignment ? (
-                          <p className="text-slate-600">
-                            Group {assignment.groupNumber} • Handicap{" "}
-                            {Number(assignment.playingHandicap).toFixed(1)}
+                  return (
+                    <article
+                      key={outing.id}
+                      className="w-[min(100%,42rem)] min-w-[min(100%,42rem)] snap-start rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface-strong)] p-5"
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-4">
+                        <div>
+                          <h3 className="text-xl font-semibold text-[var(--brand-dark)]">
+                            {outing.title}
+                          </h3>
+                          <p className="mt-1 text-sm text-slate-600">
+                            {new Date(outing.outingDate).toLocaleDateString("en-GB", {
+                              dateStyle: "medium",
+                            })}{" "}
+                            at {outing.course.name}
                           </p>
-                        ) : null}
+                        </div>
+                        <div className="grid gap-2 text-sm sm:text-right">
+                          <p className="font-semibold text-[var(--brand-dark)]">
+                            {result?.position
+                              ? `Finished ${result.position}${result.position === 1 ? "st" : result.position === 2 ? "nd" : result.position === 3 ? "rd" : "th"}`
+                              : "Finishing place not yet published"}
+                          </p>
+                          <p className="text-slate-600">{totalPoints} Stableford pts</p>
+                          {assignment ? (
+                            <p className="text-slate-600">
+                              Group {assignment.groupNumber} • Handicap{" "}
+                              {Number(assignment.playingHandicap).toFixed(1)}
+                            </p>
+                          ) : null}
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="mt-4 overflow-x-auto rounded-[1rem] border border-[var(--border)] bg-white">
-                      <table className="min-w-full border-collapse text-left text-sm">
-                        <thead className="text-[var(--brand-dark)]">
-                          <tr>
-                            <th className="bg-[var(--surface)] px-2 py-1.5 font-semibold">
-                              Hole
-                            </th>
-                            <th className="bg-amber-50/80 px-2 py-1.5 font-semibold">Par</th>
-                            <th className="bg-stone-50 px-2 py-1.5 font-semibold">Gross</th>
-                            <th className="bg-sky-50/80 px-2 py-1.5 font-semibold">Net</th>
-                            <th className="bg-emerald-50/80 px-2 py-1.5 font-semibold">Pts</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {outing.course.holes.map((hole) => {
-                            const score =
-                              outing.holeScores.find(
-                                (entry) => entry.holeNumber === hole.holeNumber,
-                              ) ?? null;
+                      <div className="mt-4 overflow-x-auto rounded-[1rem] border border-[var(--border)] bg-white">
+                        <table className="min-w-full border-collapse text-left text-sm">
+                          <thead className="text-[var(--brand-dark)]">
+                            <tr>
+                              <th className="bg-[var(--surface)] px-2 py-1.5 font-semibold">
+                                Hole
+                              </th>
+                              <th className="bg-amber-50/80 px-2 py-1.5 font-semibold">Par</th>
+                              <th className="bg-stone-50 px-2 py-1.5 font-semibold">Gross</th>
+                              <th className="bg-sky-50/80 px-2 py-1.5 font-semibold">Net</th>
+                              <th className="bg-emerald-50/80 px-2 py-1.5 font-semibold">Pts</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {outing.course.holes.map((hole) => {
+                              const score =
+                                outing.holeScores.find(
+                                  (entry) => entry.holeNumber === hole.holeNumber,
+                                ) ?? null;
 
-                            return (
-                              <tr
-                                key={`${outing.id}-${hole.holeNumber}`}
-                                className="border-t border-[var(--border)]"
-                              >
-                                <td className="bg-[var(--surface)] px-2 py-1.5 font-semibold text-[var(--brand-dark)]">
-                                  {hole.holeNumber}
-                                </td>
-                                <td className="bg-amber-50/60 px-2 py-1.5 text-slate-700">
-                                  {hole.par}
-                                </td>
-                                <td className="bg-stone-50 px-2 py-1.5 text-slate-700">
-                                  <ScoreMarker grossStrokes={score?.grossStrokes} par={hole.par} />
-                                </td>
-                                <td className="bg-sky-50/60 px-2 py-1.5 text-slate-700">
-                                  {score?.netStrokes ?? "—"}
-                                </td>
-                                <td className="bg-emerald-50/60 px-2 py-1.5 font-semibold text-[var(--brand-dark)]">
-                                  {score?.stablefordPoints ?? "—"}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </article>
-                );
-              })
+                              return (
+                                <tr
+                                  key={`${outing.id}-${hole.holeNumber}`}
+                                  className="border-t border-[var(--border)]"
+                                >
+                                  <td className="bg-[var(--surface)] px-2 py-1.5 font-semibold text-[var(--brand-dark)]">
+                                    {hole.holeNumber}
+                                  </td>
+                                  <td className="bg-amber-50/60 px-2 py-1.5 text-slate-700">
+                                    {hole.par}
+                                  </td>
+                                  <td className="bg-stone-50 px-2 py-1.5 text-slate-700">
+                                    <ScoreMarker grossStrokes={score?.grossStrokes} par={hole.par} />
+                                  </td>
+                                  <td className="bg-sky-50/60 px-2 py-1.5 text-slate-700">
+                                    {score?.netStrokes ?? "—"}
+                                  </td>
+                                  <td className="bg-emerald-50/60 px-2 py-1.5 font-semibold text-[var(--brand-dark)]">
+                                    {score?.stablefordPoints ?? "—"}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
             )}
           </div>
         </div>

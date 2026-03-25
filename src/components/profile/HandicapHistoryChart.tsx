@@ -17,20 +17,6 @@ export function HandicapHistoryChart({ points }: HandicapHistoryChartProps) {
     );
   }
 
-  if (points.length === 1) {
-    return (
-      <div className="rounded-[1.5rem] bg-[var(--surface-strong)] px-4 py-5">
-        <p className="text-sm text-slate-600">Current handicap index</p>
-        <p className="mt-2 text-3xl font-semibold text-[var(--brand-dark)]">
-          {points[0].handicapIndex.toFixed(1)}
-        </p>
-        <p className="mt-3 text-xs uppercase tracking-[0.16em] text-slate-500">
-          {points[0].label}
-        </p>
-      </div>
-    );
-  }
-
   const width = 720;
   const height = 240;
   const paddingLeft = 40;
@@ -103,6 +89,18 @@ export function HandicapHistoryChart({ points }: HandicapHistoryChartProps) {
             points={polyline}
           />
 
+          {points.length === 1 ? (
+            <line
+              x1={paddingLeft}
+              y1={chartPoints[0].y}
+              x2={width - paddingRight}
+              y2={chartPoints[0].y}
+              stroke="rgb(143 98 71 / 0.35)"
+              strokeWidth="2"
+              strokeDasharray="6 8"
+            />
+          ) : null}
+
           {chartPoints.map((point) => (
             <g key={`${point.label}-${point.handicapIndex}`}>
               <circle
@@ -126,6 +124,12 @@ export function HandicapHistoryChart({ points }: HandicapHistoryChartProps) {
           ))}
         </svg>
       </div>
+
+      {points.length === 1 ? (
+        <p className="mt-4 text-sm text-slate-600">
+          Your chart will build out as handicap updates are recorded over time.
+        </p>
+      ) : null}
 
       <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
         {points.slice(-4).map((point) => (

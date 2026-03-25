@@ -7,8 +7,10 @@ import {
   deleteMember,
   deleteCourse,
   deleteOuting,
+  removeSeededDemoData,
   removeMemberRequest,
   reassignMemberEmailLink,
+  seedDemoMemberHistory,
   updateMemberHandicap,
   updateCourse,
   updateMemberRole,
@@ -398,6 +400,66 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
           </details>
         </div>
       </section>
+
+      {isAdmin ? (
+        <section className="mx-auto mt-6 max-w-6xl px-4 sm:px-6">
+          <details className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
+            <summary className="cursor-pointer list-none">
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand)]">
+                  Demo Data
+                </p>
+                <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-800">
+                  Visible to admin only
+                </span>
+              </div>
+              <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)]">
+                Seed sample member history
+              </h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Populate the app with realistic demo rounds and handicap movement so you can preview profile and results pages.
+              </p>
+            </summary>
+
+            <div className="mt-6 grid gap-4 lg:grid-cols-2">
+              <article className="rounded-[1.5rem] bg-[var(--surface-strong)] px-5 py-5">
+                <h3 className="text-lg font-semibold text-[var(--brand-dark)]">
+                  Seed demo outings
+                </h3>
+                <p className="mt-2 text-sm leading-7 text-slate-700">
+                  Create 10 past outings for approved members, including full scorecards,
+                  finishing positions, published results, and handicap history points.
+                </p>
+                <ConfirmActionModal
+                  action={seedDemoMemberHistory}
+                  buttonLabel="Seed demo data"
+                  buttonClassName="mt-5 inline-flex min-h-10 items-center justify-center rounded-full bg-[var(--brand)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+                  title="Seed demo member history"
+                  description="This will create sample outings and handicap history for approved members so you can visualise the full experience."
+                  confirmWord="SEED"
+                />
+              </article>
+
+              <article className="rounded-[1.5rem] border border-rose-200 bg-rose-50/70 px-5 py-5">
+                <h3 className="text-lg font-semibold text-rose-900">
+                  Remove demo data
+                </h3>
+                <p className="mt-2 text-sm leading-7 text-rose-800">
+                  Remove every sample outing and every handicap history point added by the demo seeding tool.
+                </p>
+                <ConfirmActionModal
+                  action={removeSeededDemoData}
+                  buttonLabel="Remove demo data"
+                  buttonClassName="mt-5 inline-flex min-h-10 items-center justify-center rounded-full border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
+                  title="Remove demo member history"
+                  description="This will delete all seeded demo outings and seeded handicap history entries."
+                  confirmWord="REMOVE"
+                />
+              </article>
+            </div>
+          </details>
+        </section>
+      ) : null}
 
       {isAdmin ? (
         <section className="mx-auto mt-6 max-w-6xl px-4 sm:px-6">
