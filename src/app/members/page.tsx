@@ -333,16 +333,9 @@ export default async function MembersPage() {
                 <th className="sticky left-0 z-20 bg-[var(--surface-strong)] px-4 py-4 font-semibold">
                   Member
                 </th>
-                <th className="bg-white px-4 py-4 font-semibold">Handicap</th>
+                <th className="px-4 py-4 font-semibold">Handicap</th>
                 {prizeColumns.map((column) => (
-                  <th
-                    key={column.key}
-                    className={`px-4 py-4 font-semibold ${
-                      shadedColumnKeys.has(column.key)
-                        ? "bg-[var(--surface)]"
-                        : "bg-white"
-                    }`}
-                  >
+                  <th key={column.key} className="px-4 py-4 font-semibold">
                     {column.label}
                   </th>
                 ))}
@@ -364,14 +357,16 @@ export default async function MembersPage() {
                     <td className="sticky left-0 z-10 bg-[var(--surface)] px-4 py-4 font-medium text-[var(--brand-dark)]">
                       {member.name}
                     </td>
-                    <td className="bg-white px-4 py-4 text-slate-700">{member.handicap}</td>
+                    <td className="bg-[var(--surface-strong)] px-4 py-4 text-slate-700">
+                      {member.handicap}
+                    </td>
                     {prizeColumns.map((column) => (
                       <td
                         key={column.key}
                         className={`px-4 py-4 text-slate-700 ${
                           shadedColumnKeys.has(column.key)
-                            ? "bg-[var(--surface)]"
-                            : "bg-white"
+                            ? "bg-stone-200/70"
+                            : "bg-[var(--surface-strong)]"
                         }`}
                       >
                         {member[column.key]}
