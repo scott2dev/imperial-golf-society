@@ -326,6 +326,14 @@ export default async function MembersPage() {
       </section>
 
       <section className="mx-auto mt-6 max-w-6xl px-4 sm:mt-8 sm:px-6">
+        <div className="mb-4">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand)]">
+            Season 2026
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold text-[var(--brand-dark)]">
+            Season 2026 prize table
+          </h2>
+        </div>
         <div className="overflow-x-auto rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface)] shadow-sm">
           <table className="min-w-full border-collapse text-left text-sm">
             <thead className="bg-[var(--surface-strong)] text-[var(--brand-dark)]">
