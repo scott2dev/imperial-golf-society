@@ -52,20 +52,16 @@ export default function AboutImageCarousel({ slides }: AboutImageCarouselProps) 
                   currentIndex === 0 ? slides.length - 1 : currentIndex - 1,
                 )
               }
-              className="absolute left-4 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white transition hover:bg-black/60"
-            >
-              ‹
-            </button>
+              className="absolute inset-y-0 left-0 w-1/4 cursor-w-resize"
+            />
             <button
               type="button"
               aria-label="Next image"
               onClick={() =>
                 setActiveIndex((currentIndex) => (currentIndex + 1) % slides.length)
               }
-              className="absolute right-4 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white transition hover:bg-black/60"
-            >
-              ›
-            </button>
+              className="absolute inset-y-0 right-0 w-1/4 cursor-e-resize"
+            />
           </>
         ) : null}
       </div>
