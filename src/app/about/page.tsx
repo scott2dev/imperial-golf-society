@@ -76,6 +76,41 @@ export default async function AboutPage() {
           </p>
         </div>
       </section>
+
+      <section id="contact" className="mx-auto mt-6 max-w-6xl px-4 sm:mt-8 sm:px-6">
+        <div className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--brand)]">
+            Contact
+          </p>
+          <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)] sm:text-3xl">
+            Get in touch with the society
+          </h2>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-700 sm:text-base">
+            For membership enquiries, event questions, annual fees, or general
+            information about the society, use the contact details below.
+          </p>
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            <div className="min-w-0 rounded-[1.5rem] bg-[var(--surface-strong)] p-5 ring-1 ring-[var(--border)]">
+              <p className="text-sm font-medium text-slate-500">Email</p>
+              <a
+                href="mailto:contact@imperialgolfsociety.co.uk"
+                className="mt-2 block break-all text-lg font-semibold text-[var(--brand-dark)]"
+              >
+                contact@imperialgolfsociety.co.uk
+              </a>
+            </div>
+            <div className="min-w-0 rounded-[1.5rem] bg-[var(--surface-strong)] p-5 ring-1 ring-[var(--border)]">
+              <p className="text-sm font-medium text-slate-500">Membership</p>
+              <p className="mt-2 text-sm leading-7 text-slate-700">
+                Annual membership is {"\u00A3"}30, and the society welcomes golfers
+                of all standards who enjoy the balance of competitive golf and a
+                strong social side.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

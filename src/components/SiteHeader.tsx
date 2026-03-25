@@ -8,11 +8,13 @@ import { signOut, useSession } from "next-auth/react";
 import { navItems, siteName } from "@/lib/site-data";
 
 function isActive(pathname: string, href: string) {
-  if (href === "/") {
+  const normalizedHref = href.split("#")[0] || "/";
+
+  if (normalizedHref === "/") {
     return pathname === "/";
   }
 
-  return pathname === href || pathname.startsWith(`${href}/`);
+  return pathname === normalizedHref || pathname.startsWith(`${normalizedHref}/`);
 }
 
 export default function SiteHeader() {

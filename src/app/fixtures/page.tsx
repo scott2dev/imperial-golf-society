@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import FixtureImageLink from "@/components/FixtureImageLink";
 import { fixtures as fixturePresentation } from "@/lib/fixtures-data";
 import { prisma } from "@/lib/prisma";
@@ -40,6 +41,7 @@ type FixtureOuting = {
   id: string;
   title: string;
   outingDate: Date;
+  resultsPublishedAt: Date | null;
   teeTime: string | null;
   imageSrc: string | null;
   imageAlt: string | null;
@@ -76,6 +78,7 @@ export default async function FixturesPage() {
       teeTime: outing.teeTime ?? "TBC",
       imageSrc: outing.imageSrc ?? presentation?.imageSrc ?? "/bangor.jpg",
       imageAlt: outing.imageAlt ?? presentation?.imageAlt ?? outing.course.name,
+      resultsPublishedAt: outing.resultsPublishedAt,
       mapsUrl: outing.course.mapsUrl ?? "#",
       sponsorName: outing.sponsorName ?? presentation?.sponsorName ?? "Sponsor TBC",
       sponsorUrl: outing.sponsorUrl ?? presentation?.sponsorUrl ?? "#",
@@ -160,6 +163,17 @@ export default async function FixturesPage() {
                   </p>
                 </div>
               </div>
+
+              {fixture.resultsPublishedAt ? (
+                <div className="mt-5">
+                  <Link
+                    href={`/results/${fixture.id}`}
+                    className="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--border)] bg-white/60 px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-white"
+                  >
+                    View results
+                  </Link>
+                </div>
+              ) : null}
             </div>
             <div
               className={`border-t px-6 py-4 ${
