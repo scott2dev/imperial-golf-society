@@ -5,10 +5,12 @@ import {
   createAboutCarouselImage,
   createCourse,
   createOuting,
+  createWallOfShameImage,
   deleteAboutCarouselImage,
   deleteMember,
   deleteCourse,
   deleteOuting,
+  deleteWallOfShameImage,
   removeSeededDemoData,
   removeMemberRequest,
   reassignMemberEmailLink,
@@ -102,16 +104,24 @@ type AboutCarouselAdminImage = {
   sortOrder: number;
 };
 
+type WallOfShameAdminImage = {
+  id: string;
+  imageData: string;
+  tagline: string;
+  sortOrder: number;
+};
+
 export default async function CaptainPage({ searchParams }: CaptainPageProps) {
   const captain = await requireCaptain();
   const isAdmin = captain.user.role === "admin";
 
-  const [courses, members, outings, pendingMembers, aboutCarouselImages, params]: [
+  const [courses, members, outings, pendingMembers, aboutCarouselImages, wallOfShameImages, params]: [
     CaptainCourse[],
     CaptainMember[],
     CaptainOuting[],
     CaptainMember[],
     AboutCarouselAdminImage[],
+    WallOfShameAdminImage[],
     Awaited<CaptainPageProps["searchParams"]>,
   ] = await Promise.all([
     prisma.course.findMany({
@@ -150,6 +160,9 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
       },
     }),
     prisma.aboutCarouselImage.findMany({
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    }),
+    prisma.wallOfShameImage.findMany({
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     }),
     searchParams,
@@ -470,6 +483,113 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                   confirmWord="REMOVE"
                 />
               </article>
+            </div>
+          </details>
+        </section>
+      ) : null}
+
+      {isAdmin ? (
+        <section className="mx-auto mt-6 max-w-6xl px-4 sm:px-6">
+          <details className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
+            <summary className="cursor-pointer list-none">
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand)]">
+                  Wall Of Shame
+                </p>
+                <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-800">
+                  Visible to admin only
+                </span>
+              </div>
+              <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)]">
+                Manage the wall of shame gallery
+              </h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Upload previous numpty prize winner photos and add the caption shown beneath each image.
+              </p>
+            </summary>
+
+            <div className="mt-6 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+              <form
+                action={createWallOfShameImage}
+                className="rounded-[1.5rem] bg-[var(--surface-strong)] px-5 py-5"
+              >
+                <h3 className="text-lg font-semibold text-[var(--brand-dark)]">
+                  Add wall of shame image
+                </h3>
+                <div className="mt-4 grid gap-4">
+                  <label className="text-sm font-semibold text-[var(--brand-dark)]">
+                    Image
+                    <input
+                      type="file"
+                      name="image"
+                      accept="image/*"
+                      required
+                      className="mt-2 block w-full text-sm text-slate-700 file:mr-4 file:rounded-full file:border-0 file:bg-[var(--brand)] file:px-4 file:py-2 file:font-semibold file:text-white"
+                    />
+                  </label>
+
+                  <label className="text-sm font-semibold text-[var(--brand-dark)]">
+                    Tagline
+                    <input
+                      type="text"
+                      name="tagline"
+                      required
+                      maxLength={160}
+                      placeholder="Numpty of the day after finding every bunker on the back nine."
+                      className="mt-2 w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[var(--brand)]"
+                    />
+                  </label>
+
+                  <button
+                    type="submit"
+                    className="inline-flex min-h-10 items-center justify-center rounded-full bg-[var(--brand)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+                  >
+                    Upload image
+                  </button>
+                </div>
+              </form>
+
+              <div className="rounded-[1.5rem] bg-[var(--surface-strong)] px-5 py-5">
+                <h3 className="text-lg font-semibold text-[var(--brand-dark)]">
+                  Current wall of shame images
+                </h3>
+                <div className="mt-4 grid gap-3">
+                  {wallOfShameImages.length === 0 ? (
+                    <p className="rounded-[1.25rem] bg-white/75 px-4 py-4 text-sm text-slate-700">
+                      No wall of shame images added yet.
+                    </p>
+                  ) : (
+                    wallOfShameImages.map((image) => (
+                      <article
+                        key={image.id}
+                        className="rounded-[1.25rem] border border-[var(--border)] bg-white/75 p-4"
+                      >
+                        <div className="overflow-hidden rounded-[1rem]">
+                          <img
+                            src={image.imageData}
+                            alt={image.tagline}
+                            className="aspect-[4/5] w-full object-cover"
+                          />
+                        </div>
+                        <p className="mt-3 text-sm font-medium text-[var(--brand-dark)]">
+                          {image.tagline}
+                        </p>
+                        <div className="mt-4">
+                          <ConfirmActionModal
+                            action={deleteWallOfShameImage}
+                            buttonLabel="Delete image"
+                            buttonClassName="inline-flex min-h-10 items-center justify-center rounded-full border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50"
+                            title="Delete wall of shame image"
+                            description="This will remove the image from the Wall Of Shame gallery."
+                            confirmWord="DELETE"
+                            hiddenFields={{ imageId: image.id }}
+                          />
+                        </div>
+                      </article>
+                    ))
+                  )}
+                </div>
+              </div>
             </div>
           </details>
         </section>

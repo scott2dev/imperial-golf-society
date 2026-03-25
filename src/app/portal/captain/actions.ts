@@ -636,6 +636,74 @@ export async function deleteAboutCarouselImage(formData: FormData) {
   revalidatePath("/portal/captain");
 }
 
+export async function createWallOfShameImage(formData: FormData) {
+  await requireAdmin();
+
+  const tagline = getTrimmedString(formData, "tagline");
+  const image = formData.get("image");
+
+  if (!tagline) {
+    throw new Error("A tagline is required.");
+  }
+
+  if (!(image instanceof File) || image.size === 0) {
+    throw new Error("Please choose an image to upload.");
+  }
+
+  if (!image.type.startsWith("image/")) {
+    throw new Error("Only image files can be uploaded.");
+  }
+
+  if (image.size > 5 * 1024 * 1024) {
+    throw new Error("Please upload an image smaller than 5MB.");
+  }
+
+  const buffer = Buffer.from(await image.arrayBuffer());
+  const imageData = `data:${image.type};base64,${buffer.toString("base64")}`;
+  const highestSortOrder = await prisma.wallOfShameImage.findFirst({
+    orderBy: {
+      sortOrder: "desc",
+    },
+    select: {
+      sortOrder: true,
+    },
+  });
+
+  await prisma.wallOfShameImage.create({
+    data: {
+      imageData,
+      tagline,
+      sortOrder: (highestSortOrder?.sortOrder ?? -1) + 1,
+    },
+  });
+
+  revalidatePath("/members");
+  revalidatePath("/members/wall-of-shame");
+  revalidatePath("/portal/captain");
+}
+
+export async function deleteWallOfShameImage(formData: FormData) {
+  await requireAdmin();
+
+  const imageId = getTrimmedString(formData, "imageId");
+
+  if (!imageId) {
+    throw new Error("Image id is required.");
+  }
+
+  assertConfirmationPhrase(formData, "DELETE");
+
+  await prisma.wallOfShameImage.delete({
+    where: {
+      id: imageId,
+    },
+  });
+
+  revalidatePath("/members");
+  revalidatePath("/members/wall-of-shame");
+  revalidatePath("/portal/captain");
+}
+
 export async function reorderAboutCarouselImage(formData: FormData) {
   await requireAdmin();
 

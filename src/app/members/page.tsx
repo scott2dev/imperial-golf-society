@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { members, prizeColumns } from "@/lib/members-data";
 
 export const metadata: Metadata = {
@@ -32,6 +33,14 @@ export default function MembersPage() {
             This page is set up to track each member&apos;s handicap and how many
             times they have won the main society prizes across the season.
           </p>
+          <div className="mt-6">
+            <Link
+              href="/members/wall-of-shame"
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/16"
+            >
+              Visit the Wall Of Shame
+            </Link>
+          </div>
         </div>
       </section>
 
