@@ -154,9 +154,9 @@ export default function SiteHeader() {
                         <Image
                           src="/golf-flag.png"
                           alt=""
-                          width={72}
-                          height={72}
-                          className="h-[72px] w-[72px] object-contain"
+                          width={54}
+                          height={54}
+                          className="h-[54px] w-[54px] object-contain"
                         />
                       ) : (
                         "+"
