@@ -150,7 +150,17 @@ export default function SiteHeader() {
                       aria-hidden="true"
                       className={active ? "text-[#173021]" : "!text-white"}
                     >
-                      {active ? "On" : "+"}
+                      {active ? (
+                        <Image
+                          src="/golf-flag.png"
+                          alt=""
+                          width={18}
+                          height={18}
+                          className="h-[18px] w-[18px] object-contain"
+                        />
+                      ) : (
+                        "+"
+                      )}
                     </span>
                   </Link>
                 </li>
