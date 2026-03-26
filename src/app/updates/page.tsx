@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "Latest notices, announcements, and season updates.",
 };
 
+export const dynamic = "force-dynamic";
+
 const updates = [
   {
     month: "March 2026",
