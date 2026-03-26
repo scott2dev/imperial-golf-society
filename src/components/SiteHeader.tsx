@@ -35,14 +35,16 @@ export default function SiteHeader() {
       <div className="mx-auto max-w-6xl">
         <div className="flex min-h-16 items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <Link href="/" className="flex min-w-0 items-center gap-3">
-            <Image
-              src="/golf-logo.png"
-              alt="Imperial Golf Society logo"
-              width={40}
-              height={40}
-              className="h-10 w-10 object-contain"
-              priority
-            />
+            <span className="relative block h-10 w-10 overflow-visible">
+              <Image
+                src="/golf-logo.png"
+                alt="Imperial Golf Society logo"
+                width={80}
+                height={80}
+                className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 object-contain"
+                priority
+              />
+            </span>
             <span className="block truncate text-base font-semibold text-white sm:text-lg">
               {siteName}
             </span>
