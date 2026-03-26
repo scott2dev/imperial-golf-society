@@ -35,13 +35,13 @@ export default function SiteHeader() {
       <div className="mx-auto max-w-6xl">
         <div className="flex min-h-16 items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <Link href="/" className="flex min-w-0 items-center gap-3">
-            <span className="relative -my-4 -ml-2 block h-16 w-16 shrink-0 overflow-visible">
+            <span className="relative -my-3 -ml-1 block h-14 w-14 shrink-0 overflow-visible">
               <Image
                 src="/golf-logo.png"
                 alt="Imperial Golf Society logo"
-                width={128}
-                height={128}
-                className="absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 object-contain"
+                width={96}
+                height={96}
+                className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 object-contain"
                 priority
               />
             </span>
@@ -154,9 +154,9 @@ export default function SiteHeader() {
                         <Image
                           src="/golf-flag.png"
                           alt=""
-                          width={18}
-                          height={18}
-                          className="h-[18px] w-[18px] object-contain"
+                          width={72}
+                          height={72}
+                          className="h-[72px] w-[72px] object-contain"
                         />
                       ) : (
                         "+"
