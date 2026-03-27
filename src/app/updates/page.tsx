@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-const updates = [
+const fallbackUpdates = [
   {
     month: "March 2026",
     title: "Website launch",
@@ -45,20 +45,41 @@ type SeasonKeyMemberProfile = {
   sortOrder: number;
 };
 
+type SecretaryUpdateEntry = {
+  id: string;
+  title: string;
+  body: string;
+  imageData: string | null;
+  postedAt: Date;
+};
+
 export default async function UpdatesPage() {
-  const savedProfiles: SeasonKeyMemberProfile[] = await prisma.seasonKeyMemberProfile.findMany({
-    where: {
-      season: currentSeason,
-    },
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-    select: {
-      roleKey: true,
-      roleLabel: true,
-      memberName: true,
-      imageData: true,
-      sortOrder: true,
-    },
-  });
+  const [savedProfiles, secretaryUpdates]: [SeasonKeyMemberProfile[], SecretaryUpdateEntry[]] =
+    await Promise.all([
+      prisma.seasonKeyMemberProfile.findMany({
+        where: {
+          season: currentSeason,
+        },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+        select: {
+          roleKey: true,
+          roleLabel: true,
+          memberName: true,
+          imageData: true,
+          sortOrder: true,
+        },
+      }),
+      prisma.secretaryUpdate.findMany({
+        orderBy: [{ postedAt: "desc" }, { createdAt: "desc" }],
+        select: {
+          id: true,
+          title: true,
+          body: true,
+          imageData: true,
+          postedAt: true,
+        },
+      }),
+    ]);
   const keyMembers = seasonKeyMembers.map((entry) => {
     const savedProfile = savedProfiles.find((profile) => profile.roleKey === entry.roleKey);
 
@@ -134,21 +155,68 @@ export default async function UpdatesPage() {
         </div>
       </section>
 
-      <section className="mx-auto mt-6 grid max-w-6xl gap-4 px-4 sm:mt-8 sm:gap-6 sm:px-6">
-        {updates.map((update) => (
-          <article
-            key={update.title}
-            className="rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm"
-          >
-            <p className="text-sm font-medium text-[var(--brand)]">{update.month}</p>
-            <h2 className="mt-2 text-xl font-semibold text-[var(--brand-dark)]">
-              {update.title}
-            </h2>
-            <p className="mt-3 text-sm leading-7 text-slate-700 sm:text-base">
-              {update.text}
-            </p>
-          </article>
-        ))}
+      <section className="mx-auto mt-6 max-w-6xl px-4 sm:mt-8 sm:px-6">
+        <div className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand)]">
+            Society Notices
+          </p>
+          <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)] sm:text-3xl">
+            Latest posts from the secretary
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-700 sm:text-base">
+            Catch up on the most recent announcements, reminders, and member notices
+            for the season.
+          </p>
+
+          <div className="mt-6 grid gap-4 sm:gap-6">
+            {secretaryUpdates.length > 0
+              ? secretaryUpdates.map((update) => (
+                  <article
+                    key={update.id}
+                    className="rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface-strong)] p-6"
+                  >
+                    <p className="text-sm font-medium text-[var(--brand)]">
+                      {new Date(update.postedAt).toLocaleString("en-GB", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
+                    </p>
+                    <h3 className="mt-2 text-xl font-semibold text-[var(--brand-dark)]">
+                      {update.title}
+                    </h3>
+                    {update.imageData ? (
+                      <div className="mt-4 overflow-hidden rounded-[1.25rem] border border-[var(--border)] bg-white">
+                        <Image
+                          src={update.imageData}
+                          alt={update.title}
+                          width={1400}
+                          height={840}
+                          unoptimized
+                          className="h-auto w-full object-cover"
+                        />
+                      </div>
+                    ) : null}
+                    <p className="mt-4 text-sm leading-7 text-slate-700 sm:text-base">
+                      {update.body}
+                    </p>
+                  </article>
+                ))
+              : fallbackUpdates.map((update) => (
+                  <article
+                    key={update.title}
+                    className="rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface-strong)] p-6"
+                  >
+                    <p className="text-sm font-medium text-[var(--brand)]">{update.month}</p>
+                    <h3 className="mt-2 text-xl font-semibold text-[var(--brand-dark)]">
+                      {update.title}
+                    </h3>
+                    <p className="mt-3 text-sm leading-7 text-slate-700 sm:text-base">
+                      {update.text}
+                    </p>
+                  </article>
+                ))}
+          </div>
+        </div>
       </section>
     </main>
   );

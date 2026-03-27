@@ -54,6 +54,7 @@ model Member {
   outingSignatures OutingSignature[]
   handicapHistory  MemberHandicapHistory[]
   treasurerPayments TreasurerPayment[]
+  secretaryUpdates SecretaryUpdate[] @relation("SecretaryUpdateAuthor")
 }
 
 model MemberHandicapHistory {
@@ -248,4 +249,18 @@ model TreasurerPayment {
   member    Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   @@index([chargeId, memberId])
+}
+
+model SecretaryUpdate {
+  id               String   @id @default(cuid())
+  title            String
+  body             String
+  imageData        String?
+  postedAt         DateTime @default(now())
+  postedByMemberId String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  postedBy         Member?  @relation("SecretaryUpdateAuthor", fields: [postedByMemberId], references: [id], onDelete: SetNull)
+
+  @@index([postedAt, createdAt])
 }
