@@ -7,6 +7,7 @@ type AboutCarouselSlide = {
   imageSrc: string;
   tagline: string;
   fit?: "cover" | "contain";
+  imageClassName?: string;
 };
 
 type AboutImageCarouselProps = {
@@ -36,7 +37,7 @@ export default function AboutImageCarousel({ slides }: AboutImageCarouselProps) 
         <img
           src={activeSlide.imageSrc}
           alt={activeSlide.tagline}
-          className={`h-full w-full ${
+          className={`${activeSlide.imageClassName ?? ""} h-full w-full ${
             activeSlide.fit === "contain" ? "object-contain p-4 sm:p-6" : "object-cover"
           }`}
         />
