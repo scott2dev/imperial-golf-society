@@ -52,6 +52,16 @@ function getMoneyValue(formData: FormData, key: string) {
   return Number(value.toFixed(2));
 }
 
+function getOptionalMoneyValue(formData: FormData, key: string) {
+  const raw = getTrimmedString(formData, key);
+
+  if (!raw) {
+    return null;
+  }
+
+  return getMoneyValue(formData, key);
+}
+
 function assertConfirmationPhrase(formData: FormData, expected: string) {
   const confirmation = getTrimmedString(formData, "confirmation").toUpperCase();
 
@@ -65,7 +75,7 @@ export async function createTreasurerCharge(formData: FormData) {
 
   const title = getTrimmedString(formData, "title");
   const chargeKind = getTrimmedString(formData, "chargeKind");
-  const amount = getMoneyValue(formData, "amount");
+  const amount = getOptionalMoneyValue(formData, "amount");
   const dueDate = getOptionalDateValue(formData, "dueDate");
   const notes = getTrimmedString(formData, "notes");
   const outingId = getTrimmedString(formData, "outingId");
@@ -74,7 +84,12 @@ export async function createTreasurerCharge(formData: FormData) {
     throw new Error("A title is required.");
   }
 
-  if (chargeKind !== "membership" && chargeKind !== "outing" && chargeKind !== "custom") {
+  if (
+    chargeKind !== "membership" &&
+    chargeKind !== "outing" &&
+    chargeKind !== "captainsWeekend" &&
+    chargeKind !== "custom"
+  ) {
     throw new Error("Choose a valid charge type.");
   }
 
@@ -102,6 +117,66 @@ export async function createTreasurerCharge(formData: FormData) {
       title,
       chargeKind,
       season: currentSeason,
+      amount,
+      dueDate,
+      notes: notes || null,
+      outingId: chargeKind === "outing" ? outingId : null,
+    },
+  });
+
+  revalidatePath("/portal/treasurer");
+}
+
+export async function updateTreasurerCharge(formData: FormData) {
+  await requireTreasurer();
+
+  const chargeId = getTrimmedString(formData, "chargeId");
+  const title = getTrimmedString(formData, "title");
+  const chargeKind = getTrimmedString(formData, "chargeKind");
+  const amount = getOptionalMoneyValue(formData, "amount");
+  const dueDate = getOptionalDateValue(formData, "dueDate");
+  const notes = getTrimmedString(formData, "notes");
+  const outingId = getTrimmedString(formData, "outingId");
+
+  if (!chargeId || !title) {
+    throw new Error("Charge id and title are required.");
+  }
+
+  if (
+    chargeKind !== "membership" &&
+    chargeKind !== "outing" &&
+    chargeKind !== "captainsWeekend" &&
+    chargeKind !== "custom"
+  ) {
+    throw new Error("Choose a valid charge type.");
+  }
+
+  if (chargeKind === "outing" && !outingId) {
+    throw new Error("Choose an outing for an outing charge.");
+  }
+
+  if (outingId) {
+    const outing = await prisma.outing.findUnique({
+      where: {
+        id: outingId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!outing) {
+      throw new Error("That outing could not be found.");
+    }
+  }
+
+  await prisma.treasurerCharge.update({
+    where: {
+      id: chargeId,
+    },
+    data: {
+      title,
+      chargeKind,
       amount,
       dueDate,
       notes: notes || null,
@@ -177,9 +252,10 @@ export async function recordTreasurerPayment(formData: FormData) {
   }
 
   const existingPaid = charge.payments.reduce((total, payment) => total + Number(payment.amount), 0);
-  const outstanding = Number(charge.amount) - existingPaid;
+  const outstanding =
+    charge.amount === null ? null : Number(charge.amount) - existingPaid;
 
-  if (amount > Number(outstanding.toFixed(2))) {
+  if (outstanding !== null && amount > Number(outstanding.toFixed(2))) {
     throw new Error("This payment is more than the outstanding balance for that member.");
   }
 

@@ -31,6 +31,7 @@ enum OutingStatus {
 enum TreasurerChargeKind {
   membership
   outing
+  captainsWeekend
   custom
 }
 
@@ -222,7 +223,7 @@ model TreasurerCharge {
   title      String
   chargeKind TreasurerChargeKind
   season     Int
-  amount     Decimal             @db.Decimal(8, 2)
+  amount     Decimal?            @db.Decimal(8, 2)
   dueDate    DateTime?
   notes      String?
   outingId   String?

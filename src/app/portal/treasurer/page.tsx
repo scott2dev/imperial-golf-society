@@ -9,6 +9,7 @@ import {
   deleteTreasurerCharge,
   deleteTreasurerPayment,
   recordTreasurerPayment,
+  updateTreasurerCharge,
 } from "./actions";
 
 export const metadata: Metadata = {
@@ -35,9 +36,9 @@ type TreasurerOuting = {
 type TreasurerCharge = {
   id: string;
   title: string;
-  chargeKind: "membership" | "outing" | "custom";
+  chargeKind: "membership" | "outing" | "captainsWeekend" | "custom";
   season: number;
-  amount: number | { toString(): string };
+  amount: number | { toString(): string } | null;
   dueDate: Date | null;
   notes: string | null;
   createdAt: Date;
@@ -77,6 +78,8 @@ function getChargeLabel(kind: TreasurerCharge["chargeKind"]) {
       return "Membership fee";
     case "outing":
       return "Outing payment";
+    case "captainsWeekend":
+      return "Captain's Weekend";
     default:
       return "Custom charge";
   }
@@ -165,7 +168,7 @@ export default async function TreasurerPortalPage() {
   const totalExpected = charges.reduce((total, charge) => {
     const applicableMembers = getApplicableMembers(charge, approvedMembers);
 
-    return total + Number(charge.amount) * applicableMembers.length;
+    return total + (charge.amount === null ? 0 : Number(charge.amount) * applicableMembers.length);
   }, 0);
   const totalPaid = charges.reduce(
     (total, charge) =>
@@ -260,6 +263,7 @@ export default async function TreasurerPortalPage() {
                   >
                     <option value="membership">Membership fee</option>
                     <option value="outing">Outing payment</option>
+                    <option value="captainsWeekend">Captain&apos;s Weekend</option>
                     <option value="custom">Custom charge</option>
                   </select>
                 </label>
@@ -271,8 +275,7 @@ export default async function TreasurerPortalPage() {
                     name="amount"
                     min={0.01}
                     step={0.01}
-                    required
-                    placeholder="10.00"
+                    placeholder="Leave blank if still to be confirmed"
                     className="mt-2 w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--brand)]"
                   />
                 </label>
@@ -373,12 +376,14 @@ export default async function TreasurerPortalPage() {
             ) : (
               charges.map((charge) => {
                 const applicableMembers = getApplicableMembers(charge, approvedMembers);
-                const totalDue = Number(charge.amount) * applicableMembers.length;
+                const totalDue =
+                  charge.amount === null ? null : Number(charge.amount) * applicableMembers.length;
                 const totalPaidForCharge = charge.payments.reduce(
                   (total, payment) => total + Number(payment.amount),
                   0,
                 );
-                const totalOutstandingForCharge = Math.max(0, totalDue - totalPaidForCharge);
+                const totalOutstandingForCharge =
+                  totalDue === null ? null : Math.max(0, totalDue - totalPaidForCharge);
 
                 return (
                   <details
@@ -395,7 +400,9 @@ export default async function TreasurerPortalPage() {
                             </span>
                           </div>
                           <p className="mt-1 text-sm text-slate-600">
-                            {formatMoney(Number(charge.amount))} per member
+                            {charge.amount === null
+                              ? "Amount to be confirmed"
+                              : `${formatMoney(Number(charge.amount))} per member`}
                             {charge.outing
                               ? ` · ${charge.outing.title}`
                               : ` · ${applicableMembers.length} members`}
@@ -413,7 +420,9 @@ export default async function TreasurerPortalPage() {
                             {formatMoney(totalPaidForCharge)} collected
                           </p>
                           <p className="mt-1 text-sm text-slate-600">
-                            {formatMoney(totalOutstandingForCharge)} outstanding
+                            {totalOutstandingForCharge === null
+                              ? "Outstanding to be confirmed"
+                              : `${formatMoney(totalOutstandingForCharge)} outstanding`}
                           </p>
                         </div>
                       </div>
@@ -424,6 +433,97 @@ export default async function TreasurerPortalPage() {
                     ) : null}
 
                     <div className="mt-4 flex flex-wrap gap-3">
+                      <ConfirmActionModal
+                        action={updateTreasurerCharge}
+                        buttonLabel="Edit charge"
+                        buttonClassName="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-white"
+                        title="Edit charge"
+                        description="Update the title, amount, due date, or linked outing for this charge."
+                        hiddenFields={{ chargeId: charge.id }}
+                        confirmButtonLabel="Save charge"
+                      >
+                        <div className="grid gap-4">
+                          <label className="text-sm font-semibold text-[var(--brand-dark)]">
+                            Title
+                            <input
+                              name="title"
+                              defaultValue={charge.title}
+                              className="mt-2 w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm outline-none transition focus:border-[var(--brand)]"
+                            />
+                          </label>
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <label className="text-sm font-semibold text-[var(--brand-dark)]">
+                              Charge type
+                              <select
+                                name="chargeKind"
+                                defaultValue={charge.chargeKind}
+                                className="mt-2 w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm outline-none transition focus:border-[var(--brand)]"
+                              >
+                                <option value="membership">Membership fee</option>
+                                <option value="outing">Outing payment</option>
+                                <option value="captainsWeekend">Captain&apos;s Weekend</option>
+                                <option value="custom">Custom charge</option>
+                              </select>
+                            </label>
+                            <label className="text-sm font-semibold text-[var(--brand-dark)]">
+                              Amount
+                              <input
+                                type="number"
+                                name="amount"
+                                min={0.01}
+                                step={0.01}
+                                defaultValue={
+                                  charge.amount === null ? "" : Number(charge.amount).toFixed(2)
+                                }
+                                placeholder="Leave blank if still to be confirmed"
+                                className="mt-2 w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm outline-none transition focus:border-[var(--brand)]"
+                              />
+                            </label>
+                          </div>
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <label className="text-sm font-semibold text-[var(--brand-dark)]">
+                              Due date
+                              <input
+                                type="date"
+                                name="dueDate"
+                                defaultValue={
+                                  charge.dueDate
+                                    ? new Date(charge.dueDate).toISOString().slice(0, 10)
+                                    : ""
+                                }
+                                className="mt-2 w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm outline-none transition focus:border-[var(--brand)]"
+                              />
+                            </label>
+                            <label className="text-sm font-semibold text-[var(--brand-dark)]">
+                              Linked outing
+                              <select
+                                name="outingId"
+                                defaultValue={charge.outing?.id ?? ""}
+                                className="mt-2 w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm outline-none transition focus:border-[var(--brand)]"
+                              >
+                                <option value="">No linked outing</option>
+                                {outings.map((outing) => (
+                                  <option key={outing.id} value={outing.id}>
+                                    {outing.title} ·{" "}
+                                    {new Date(outing.outingDate).toLocaleDateString("en-GB", {
+                                      dateStyle: "medium",
+                                    })}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                          </div>
+                          <label className="text-sm font-semibold text-[var(--brand-dark)]">
+                            Notes
+                            <textarea
+                              name="notes"
+                              rows={3}
+                              defaultValue={charge.notes ?? ""}
+                              className="mt-2 w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm outline-none transition focus:border-[var(--brand)]"
+                            />
+                          </label>
+                        </div>
+                      </ConfirmActionModal>
                       <ConfirmActionModal
                         action={deleteTreasurerCharge}
                         buttonLabel="Delete charge"
@@ -444,7 +544,10 @@ export default async function TreasurerPortalPage() {
                           (total, payment) => total + Number(payment.amount),
                           0,
                         );
-                        const outstanding = Math.max(0, Number(charge.amount) - paidTotal);
+                        const outstanding =
+                          charge.amount === null
+                            ? null
+                            : Math.max(0, Number(charge.amount) - paidTotal);
 
                         return (
                           <article
@@ -458,20 +561,26 @@ export default async function TreasurerPortalPage() {
                                 </p>
                                 <p className="mt-1 text-sm text-slate-600">
                                   Paid {formatMoney(paidTotal)} · Outstanding{" "}
-                                  {formatMoney(outstanding)}
+                                  {outstanding === null
+                                    ? "to be confirmed"
+                                    : formatMoney(outstanding)}
                                 </p>
                               </div>
                               <div className="flex flex-wrap items-center gap-3">
                                 <span
                                   className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] ${
-                                    outstanding <= 0
+                                    outstanding !== null && outstanding <= 0
                                       ? "border border-emerald-200 bg-emerald-50 text-emerald-800"
                                       : "border border-amber-200 bg-amber-50 text-amber-800"
                                   }`}
                                 >
-                                  {outstanding <= 0 ? "Paid in full" : "Outstanding"}
+                                  {outstanding !== null && outstanding <= 0
+                                    ? "Paid in full"
+                                    : outstanding === null
+                                      ? "Amount tbc"
+                                      : "Outstanding"}
                                 </span>
-                                {outstanding > 0 ? (
+                                {outstanding === null || outstanding > 0 ? (
                                   <ConfirmActionModal
                                     action={recordTreasurerPayment}
                                     buttonLabel="Record payment"
@@ -491,9 +600,13 @@ export default async function TreasurerPortalPage() {
                                           type="number"
                                           name="amount"
                                           min={0.01}
-                                          max={Number(outstanding.toFixed(2))}
                                           step={0.01}
-                                          defaultValue={Number(outstanding.toFixed(2))}
+                                          {...(outstanding !== null
+                                            ? {
+                                                max: Number(outstanding.toFixed(2)),
+                                                defaultValue: Number(outstanding.toFixed(2)),
+                                              }
+                                            : {})}
                                           className="mt-2 w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm outline-none transition focus:border-[var(--brand)]"
                                         />
                                       </label>
