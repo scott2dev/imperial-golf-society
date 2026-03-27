@@ -1149,6 +1149,8 @@ export async function updateMemberHandicap(formData: FormData) {
 
   revalidatePath("/portal");
   revalidatePath("/portal/captain");
+  revalidatePath("/portal/handicap-committee");
+  revalidatePath("/members");
 }
 
 export async function reassignMemberEmailLink(formData: FormData) {
