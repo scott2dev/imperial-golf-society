@@ -571,6 +571,7 @@ export async function seedDemoMemberHistory(_formData: FormData) {
   revalidatePath("/portal/captain");
   revalidatePath("/results");
   revalidatePath("/fixtures");
+  revalidatePath("/members");
 }
 
 export async function removeSeededDemoData(formData: FormData) {
@@ -585,6 +586,7 @@ export async function removeSeededDemoData(formData: FormData) {
   revalidatePath("/portal/captain");
   revalidatePath("/results");
   revalidatePath("/fixtures");
+  revalidatePath("/members");
 }
 
 export async function createAboutCarouselImage(formData: FormData) {
