@@ -22,7 +22,9 @@ export default async function AboutPage() {
       id: "imperial-bar-default",
       imageSrc: "/imperial_Sponsor.png",
       tagline: "Imperial Bar remains at the heart of the society.",
-      imageClassName: "scale-[1.02]",
+      fit: "contain" as const,
+      frameClassName: "bg-[#d8d0c3]",
+      imageClassName: "p-2 sm:p-3",
     },
     ...storedCarouselImages.map((image) => ({
       id: image.id,

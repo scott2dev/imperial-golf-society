@@ -8,6 +8,7 @@ type AboutCarouselSlide = {
   tagline: string;
   fit?: "cover" | "contain";
   imageClassName?: string;
+  frameClassName?: string;
 };
 
 type AboutImageCarouselProps = {
@@ -33,7 +34,11 @@ export default function AboutImageCarousel({ slides }: AboutImageCarouselProps) 
 
   return (
     <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-black/10">
-      <div className="relative aspect-[4/3] sm:aspect-[5/3] lg:aspect-[16/9]">
+      <div
+        className={`relative aspect-[4/3] sm:aspect-[5/3] lg:aspect-[16/9] ${
+          activeSlide.frameClassName ?? ""
+        }`}
+      >
         <img
           src={activeSlide.imageSrc}
           alt={activeSlide.tagline}
