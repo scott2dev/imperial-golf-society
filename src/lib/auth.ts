@@ -1,7 +1,15 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth-options";
-import { getMemberRecordById } from "@/lib/member-store";
+import { getMemberRecordById, type MemberRole } from "@/lib/member-store";
+
+export function isCaptainLevelRole(role: MemberRole) {
+  return role === "captain" || role === "viceCaptain" || role === "admin";
+}
+
+export function isHandicapManagerRole(role: MemberRole) {
+  return role === "handicapCommittee" || role === "admin";
+}
 
 export async function getSession() {
   return getServerSession(authOptions);
@@ -45,7 +53,7 @@ export async function getCurrentMember() {
 export async function requireCaptain() {
   const member = await getCurrentMember();
 
-  if (member.role !== "captain" && member.role !== "admin") {
+  if (!isCaptainLevelRole(member.role)) {
     redirect("/portal");
   }
 
@@ -64,4 +72,28 @@ export async function requireAdmin() {
   return {
     user: member,
   };
+}
+
+async function requireOneOfRoles(roles: MemberRole[]) {
+  const member = await getCurrentMember();
+
+  if (!roles.includes(member.role)) {
+    redirect("/portal");
+  }
+
+  return {
+    user: member,
+  };
+}
+
+export async function requireTreasurer() {
+  return requireOneOfRoles(["treasurer", "admin"]);
+}
+
+export async function requireSecretary() {
+  return requireOneOfRoles(["secretary", "admin"]);
+}
+
+export async function requireHandicapCommittee() {
+  return requireOneOfRoles(["handicapCommittee", "admin"]);
 }

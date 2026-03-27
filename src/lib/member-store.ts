@@ -1,6 +1,13 @@
 import { prisma } from "@/lib/prisma";
 
-export type MemberRole = "member" | "captain" | "admin";
+export type MemberRole =
+  | "member"
+  | "captain"
+  | "viceCaptain"
+  | "treasurer"
+  | "secretary"
+  | "handicapCommittee"
+  | "admin";
 export type MemberApprovalStatus = "approved" | "pending";
 
 export type MemberRecord = {

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getCurrentMember } from "@/lib/auth";
+import { getCurrentMember, isCaptainLevelRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 function getTrimmedString(formData: FormData, key: string) {
@@ -24,8 +24,8 @@ export async function publishOutingResults(formData: FormData) {
     throw new Error("Outing id is required.");
   }
 
-  if (member.role !== "captain" && member.role !== "admin") {
-    throw new Error("Only a captain or admin can publish results.");
+  if (!isCaptainLevelRole(member.role)) {
+    throw new Error("Only the captain team can publish results.");
   }
 
   assertConfirmationPhrase(formData, "PUBLISH");
@@ -79,8 +79,8 @@ export async function unpublishOutingResults(formData: FormData) {
     throw new Error("Outing id is required.");
   }
 
-  if (member.role !== "captain" && member.role !== "admin") {
-    throw new Error("Only a captain or admin can unpublish results.");
+  if (!isCaptainLevelRole(member.role)) {
+    throw new Error("Only the captain team can unpublish results.");
   }
 
   assertConfirmationPhrase(formData, "UNPUBLISH");

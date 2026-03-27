@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getCurrentMember } from "@/lib/auth";
+import { getCurrentMember, isCaptainLevelRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculateStablefordHoleScore } from "@/lib/scoring";
 
@@ -485,8 +485,8 @@ export async function removeGroupSubmission(formData: FormData) {
     throw new Error("Outing id is required.");
   }
 
-  if (member.role !== "captain" && member.role !== "admin") {
-    throw new Error("Only a captain or admin can remove a submitted group round.");
+  if (!isCaptainLevelRole(member.role)) {
+    throw new Error("Only the captain team can remove a submitted group round.");
   }
 
   assertConfirmationPhrase(formData, "REMOVE");

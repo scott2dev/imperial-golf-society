@@ -22,8 +22,33 @@ type PortalOuting = {
   }>;
 };
 
+function getRoleLabel(role: string) {
+  switch (role) {
+    case "captain":
+      return "Captain";
+    case "viceCaptain":
+      return "Vice Captain";
+    case "treasurer":
+      return "Treasurer";
+    case "secretary":
+      return "Secretary";
+    case "handicapCommittee":
+      return "Handicap Committee";
+    case "admin":
+      return "Admin";
+    default:
+      return "Member";
+  }
+}
+
 export default async function PortalPage() {
   const member = await getCurrentMember();
+  const canManageDay =
+    member.role === "admin" || member.role === "captain" || member.role === "viceCaptain";
+  const canOpenTreasurerPortal = member.role === "admin" || member.role === "treasurer";
+  const canOpenSecretaryPortal = member.role === "admin" || member.role === "secretary";
+  const canOpenHandicapPortal =
+    member.role === "admin" || member.role === "handicapCommittee";
   const upcomingOutings: PortalOuting[] = await prisma.outing.findMany({
     orderBy: { outingDate: "asc" },
     include: {
@@ -74,8 +99,8 @@ export default async function PortalPage() {
                 <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                   Role
                 </dt>
-                <dd className="mt-2 text-sm font-medium capitalize text-slate-800">
-                  {member.role}
+                <dd className="mt-2 text-sm font-medium text-slate-800">
+                  {getRoleLabel(member.role)}
                 </dd>
               </div>
               <div className="rounded-[1.5rem] bg-[var(--surface-strong)] p-5">
@@ -108,29 +133,54 @@ export default async function PortalPage() {
 
           <aside className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand)]">
-              {member.role === "admin"
-                ? "Admin Controls"
-                : member.role === "captain"
-                  ? "Captain Controls"
-                  : "Member Info"}
+              {canManageDay || canOpenTreasurerPortal || canOpenSecretaryPortal || canOpenHandicapPortal
+                ? "Role Controls"
+                : "Member Info"}
             </p>
             <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)]">
-              {member.role === "admin" || member.role === "captain"
-                ? "Manage the day"
+              {canManageDay || canOpenTreasurerPortal || canOpenSecretaryPortal || canOpenHandicapPortal
+                ? "Your role tools"
                 : "What you can do here"}
             </h2>
-            {member.role === "admin" || member.role === "captain" ? (
+            {canManageDay || canOpenTreasurerPortal || canOpenSecretaryPortal || canOpenHandicapPortal ? (
               <div className="mt-5">
                 <p className="text-sm leading-6 text-slate-700">
-                  Open the admin area to create outings, update courses, organise
-                  groups, and keep everything ready for match day.
+                  Open the tools linked to your role to manage the season, keep records up to date, and support the society team.
                 </p>
-                <Link
-                  href="/portal/captain"
-                  className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--brand)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
-                >
-                  Open admin area
-                </Link>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  {canManageDay ? (
+                    <Link
+                      href="/portal/captain"
+                      className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--brand)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)]"
+                    >
+                      Open admin area
+                    </Link>
+                  ) : null}
+                  {canOpenTreasurerPortal ? (
+                    <Link
+                      href="/portal/treasurer"
+                      className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] px-5 py-2.5 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface-strong)]"
+                    >
+                      Open treasurer portal
+                    </Link>
+                  ) : null}
+                  {canOpenSecretaryPortal ? (
+                    <Link
+                      href="/portal/secretary"
+                      className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] px-5 py-2.5 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface-strong)]"
+                    >
+                      Open secretary portal
+                    </Link>
+                  ) : null}
+                  {canOpenHandicapPortal ? (
+                    <Link
+                      href="/portal/handicap-committee"
+                      className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] px-5 py-2.5 text-sm font-semibold text-[var(--brand-dark)] transition hover:bg-[var(--surface-strong)]"
+                    >
+                      Open handicap portal
+                    </Link>
+                  ) : null}
+                </div>
               </div>
             ) : (
               <ul className="mt-5 grid gap-3 text-sm leading-6 text-slate-700">

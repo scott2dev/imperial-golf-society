@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireAdmin, requireCaptain } from "@/lib/auth";
+import { requireAdmin, requireCaptain, requireHandicapCommittee } from "@/lib/auth";
 import { createPlaceholderHoleSetup } from "@/lib/course-defaults";
 import { fixtures } from "@/lib/fixtures-data";
 import { currentSeason } from "@/lib/key-members-data";
@@ -360,7 +360,7 @@ export async function updateCourse(formData: FormData) {
   revalidatePath("/fixtures");
 }
 
-export async function seedDemoMemberHistory(_formData: FormData) {
+export async function seedDemoMemberHistory() {
   await requireAdmin();
 
   await removeSeededDemoDataInternal();
@@ -1102,7 +1102,15 @@ export async function updateMemberRole(formData: FormData) {
     throw new Error("Member id is required.");
   }
 
-  if (role !== "member" && role !== "captain" && role !== "admin") {
+  if (
+    role !== "member" &&
+    role !== "captain" &&
+    role !== "viceCaptain" &&
+    role !== "treasurer" &&
+    role !== "secretary" &&
+    role !== "handicapCommittee" &&
+    role !== "admin"
+  ) {
     throw new Error("A valid member role is required.");
   }
 
@@ -1113,7 +1121,7 @@ export async function updateMemberRole(formData: FormData) {
 }
 
 export async function updateMemberHandicap(formData: FormData) {
-  await requireAdmin();
+  await requireHandicapCommittee();
 
   const memberId = getTrimmedString(formData, "memberId");
   const handicapIndex = getNumberValue(formData, "handicapIndex");

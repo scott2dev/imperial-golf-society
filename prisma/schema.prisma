@@ -9,6 +9,10 @@ datasource db {
 enum MemberRole {
   member
   captain
+  viceCaptain
+  treasurer
+  secretary
+  handicapCommittee
   admin
 }
 

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ConfirmActionModal } from "@/components/admin/ConfirmActionModal";
 import { ScoreMarker } from "@/components/scoring/ScoreMarker";
-import { getCurrentMember } from "@/lib/auth";
+import { getCurrentMember, isCaptainLevelRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculateStablefordTotal } from "@/lib/scoring";
 import { publishOutingResults, unpublishOutingResults } from "./actions";
@@ -115,7 +115,7 @@ export default async function OutingResultsPage({ params }: ResultsPageProps) {
     notFound();
   }
 
-  const isCaptainOrAdmin = member.role === "captain" || member.role === "admin";
+  const isCaptainOrAdmin = isCaptainLevelRole(member.role);
   const allGroupsSubmitted =
     outing.players.length > 0 && outing.players.every((player) => player.submittedAt !== null);
   const isFinalizedByAdmin = outing.status === "finalized";
@@ -252,7 +252,7 @@ export default async function OutingResultsPage({ params }: ResultsPageProps) {
               <p className="mt-2 text-sm text-slate-600">
                 {isPublished
                   ? "These results have been published and are now visible to all members."
-                  : "These results are currently visible only to the captain/admin until they are published."}
+                  : "These results are currently visible only to the captain team until they are published."}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -289,7 +289,7 @@ export default async function OutingResultsPage({ params }: ResultsPageProps) {
 
           {isCaptainOrAdmin && !isPublished ? (
             <div className="mt-4 inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-800">
-              Visible to captain only
+              Visible to captain team only
             </div>
           ) : null}
 

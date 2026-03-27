@@ -7,6 +7,7 @@ import { ConfirmActionModal } from "@/components/admin/ConfirmActionModal";
 import { OutingScorecard } from "@/components/scoring/OutingScorecard";
 import { ScoreMarker } from "@/components/scoring/ScoreMarker";
 import { ScoreInput } from "@/components/scoring/ScoreInput";
+import { isCaptainLevelRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculateStablefordTotal } from "@/lib/scoring";
 import {
@@ -130,7 +131,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
 
   const outing = outingResult;
 
-  const isCaptainOrAdmin = member.role === "captain" || member.role === "admin";
+  const isCaptainOrAdmin = isCaptainLevelRole(member.role);
   const isAdmin = member.role === "admin";
   const memberAssignment = outing.players.find((player) => player.memberId === member.id);
 
@@ -228,7 +229,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
               dateStyle: "full",
             })}{" "}
             at {outing.course.name}. Group members can see only their own live table,
-            and the captain/admin can review full results after every group submits.
+            and the captain team can review full results after every group submits.
           </p>
         </div>
       </section>
@@ -334,7 +335,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
               </>
             ) : (
               <p className="mt-4 text-sm leading-6 text-slate-700">
-                You are viewing this page as captain/admin rather than as a player in
+                You are viewing this page as part of the captain team rather than as a player in
                 the outing.
               </p>
             )}
@@ -382,7 +383,7 @@ export default async function OutingScoringPage({ params }: OutingPageProps) {
                   ? "All groups have submitted. Full results and prizes are now visible below."
                   : isFinalizedByAdmin
                     ? "An admin has finalized submissions. Full results and prizes are now visible below."
-                    : "Full leaderboard and prize summary unlock for captain/admin when every group has submitted, or when an admin finalizes the outing."}
+                    : "Full leaderboard and prize summary unlock for the captain team when every group has submitted, or when an admin finalizes the outing."}
               </div>
             ) : null}
             {isAdmin && !canShowCaptainResults ? (

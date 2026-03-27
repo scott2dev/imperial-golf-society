@@ -62,7 +62,14 @@ type CaptainMember = {
   id: string;
   name: string;
   email: string | null;
-  role: "member" | "captain" | "admin";
+  role:
+    | "member"
+    | "captain"
+    | "viceCaptain"
+    | "treasurer"
+    | "secretary"
+    | "handicapCommittee"
+    | "admin";
   isRegistered: boolean;
   approvalStatus: "approved" | "pending";
   handicapIndex: number | { toString(): string } | null;
@@ -129,6 +136,8 @@ type SeasonKeyMemberProfile = {
 export default async function CaptainPage({ searchParams }: CaptainPageProps) {
   const captain = await requireCaptain();
   const isAdmin = captain.user.role === "admin";
+  const canManageHandicaps =
+    captain.user.role === "admin" || captain.user.role === "handicapCommittee";
 
   const [courses, members, outings, pendingMembers, aboutCarouselImages, wallOfShameImages, keyMemberProfiles, params]: [
     CaptainCourse[],
@@ -943,7 +952,7 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
         </section>
       ) : null}
 
-      {isAdmin ? (
+      {(isAdmin || canManageHandicaps) ? (
         <section className="mx-auto mt-6 max-w-6xl px-4 sm:px-6">
           <details className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
             <summary className="cursor-pointer list-none">
@@ -951,18 +960,25 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand)]">
                   Member Controls
                 </p>
-                <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-800">
-                  Visible to admin only
+                <span className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] ${
+                  isAdmin
+                    ? "border border-amber-200 bg-amber-50 text-amber-800"
+                    : "border border-emerald-200 bg-emerald-50 text-emerald-800"
+                }`}>
+                  {isAdmin ? "Visible to admin only" : "Handicap access"}
                 </span>
               </div>
               <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)]">
-                Approvals and roles
+                {isAdmin ? "Approvals and roles" : "Handicap updates"}
               </h2>
               <p className="mt-2 text-sm text-slate-600">
-                Review new member requests and update roles when needed.
+                {isAdmin
+                  ? "Review new member requests and update roles when needed."
+                  : "Update member handicaps for future outings and scorekeeping."}
               </p>
             </summary>
             <div className="mt-6 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+              {isAdmin ? (
               <div>
                 <h3 className="text-lg font-semibold text-[var(--brand-dark)]">
                   Pending member requests
@@ -1013,10 +1029,11 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                 )}
               </div>
               </div>
+              ) : null}
 
               <div>
                 <h3 className="text-lg font-semibold text-[var(--brand-dark)]">
-                  Approved members
+                  {isAdmin ? "Approved members" : "Member handicaps"}
                 </h3>
                 <div className="mt-4 grid gap-3">
                   {members.map((member) => (
@@ -1071,6 +1088,7 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                           </ConfirmActionModal>
                         </div>
 
+                        {isAdmin ? (
                         <form action={updateMemberRole} className="flex flex-wrap gap-3">
                         <input type="hidden" name="memberId" value={member.id} />
                         <select
@@ -1080,6 +1098,10 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                         >
                           <option value="member">Member</option>
                           <option value="captain">Captain</option>
+                          <option value="viceCaptain">Vice Captain</option>
+                          <option value="treasurer">Treasurer</option>
+                          <option value="secretary">Secretary</option>
+                          <option value="handicapCommittee">Handicap Committee</option>
                           <option value="admin">Admin</option>
                         </select>
                         <button
@@ -1089,8 +1111,10 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                           Save role
                         </button>
                         </form>
+                        ) : null}
                       </div>
 
+                      {isAdmin ? (
                       <div className="mt-4 grid gap-3 rounded-[1.25rem] border border-[var(--border)] bg-white/70 px-4 py-4">
                         <div>
                           <p className="text-sm font-semibold text-[var(--brand-dark)]">
@@ -1143,6 +1167,7 @@ export default async function CaptainPage({ searchParams }: CaptainPageProps) {
                           </p>
                         )}
                       </div>
+                      ) : null}
 
                       <div className="mt-4 grid gap-3 rounded-[1.25rem] border border-rose-200 bg-rose-50/70 px-4 py-4">
                         <div>
