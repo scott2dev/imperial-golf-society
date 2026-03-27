@@ -20,7 +20,7 @@ export default async function AboutPage() {
   const carouselSlides = [
     {
       id: "imperial-bar-default",
-      imageSrc: "/imperialbarold.jpg",
+      imageSrc: "/imperial_Sponsor.png",
       tagline: "Imperial Bar remains at the heart of the society.",
     },
     ...storedCarouselImages.map((image) => ({
