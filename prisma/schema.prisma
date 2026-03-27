@@ -28,6 +28,12 @@ enum OutingStatus {
   finalized
 }
 
+enum TreasurerChargeKind {
+  membership
+  outing
+  custom
+}
+
 model Member {
   id               String                 @id @default(cuid())
   email            String?                @unique
@@ -46,6 +52,7 @@ model Member {
   outingResults    OutingResult[]
   outingSignatures OutingSignature[]
   handicapHistory  MemberHandicapHistory[]
+  treasurerPayments TreasurerPayment[]
 }
 
 model MemberHandicapHistory {
@@ -107,6 +114,7 @@ model Outing {
   holeScores    HoleScore[]
   outingResults OutingResult[]
   signatures    OutingSignature[]
+  treasurerCharges TreasurerCharge[]
 }
 
 model OutingPlayer {
@@ -207,4 +215,36 @@ model SeasonKeyMemberProfile {
   updatedAt  DateTime @updatedAt
 
   @@unique([season, roleKey])
+}
+
+model TreasurerCharge {
+  id         String              @id @default(cuid())
+  title      String
+  chargeKind TreasurerChargeKind
+  season     Int
+  amount     Decimal             @db.Decimal(8, 2)
+  dueDate    DateTime?
+  notes      String?
+  outingId   String?
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  outing     Outing?             @relation(fields: [outingId], references: [id], onDelete: SetNull)
+  payments   TreasurerPayment[]
+
+  @@index([season, createdAt])
+}
+
+model TreasurerPayment {
+  id        String          @id @default(cuid())
+  chargeId  String
+  memberId  String
+  amount    Decimal         @db.Decimal(8, 2)
+  paidAt    DateTime        @default(now())
+  notes     String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  charge    TreasurerCharge @relation(fields: [chargeId], references: [id], onDelete: Cascade)
+  member    Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([chargeId, memberId])
 }
