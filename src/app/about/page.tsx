@@ -134,7 +134,7 @@ export default async function AboutPage() {
             </a>
 
             <a
-              href="https://www.irvinesbutchers.com"
+              href="https://irvinesbutchery.co.uk/"
               target="_blank"
               rel="noreferrer"
               className="rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface-strong)] p-5 transition hover:bg-white sm:col-span-2"
