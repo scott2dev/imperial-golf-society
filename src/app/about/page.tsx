@@ -101,7 +101,7 @@ export default async function AboutPage() {
               rel="noreferrer"
               className="rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface-strong)] p-5 transition hover:bg-white"
             >
-              <div className="flex min-h-40 items-center justify-center rounded-[1.25rem] bg-white p-4">
+              <div className="flex min-h-40 items-center justify-center rounded-[1.25rem] p-4">
                 <Image
                   src="/imperial_Sponsor.png"
                   alt="Imperial Bar sponsor sign"
@@ -120,7 +120,7 @@ export default async function AboutPage() {
               rel="noreferrer"
               className="rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface-strong)] p-5 transition hover:bg-white"
             >
-              <div className="flex min-h-40 items-center justify-center rounded-[1.25rem] bg-white p-4">
+              <div className="flex min-h-40 items-center justify-center rounded-[1.25rem] p-4">
                 <Image
                   src="/dmsuppliesni_sponsor.png"
                   alt="DM Supplies NI sponsor logo"
@@ -131,6 +131,25 @@ export default async function AboutPage() {
               </div>
               <p className="mt-4 text-lg font-semibold text-[var(--brand-dark)]">DM Supplies NI</p>
               <p className="mt-1 text-sm text-slate-600">www.dmsuppliesni.co.uk</p>
+            </a>
+
+            <a
+              href="https://www.irvinesbutchers.com"
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface-strong)] p-5 transition hover:bg-white sm:col-span-2"
+            >
+              <div className="flex min-h-40 items-center justify-center rounded-[1.25rem] p-4">
+                <Image
+                  src="/irvinesbutchers_sponsor.png"
+                  alt="Irvines Butchers sponsor logo"
+                  width={640}
+                  height={360}
+                  className="h-auto max-h-28 w-auto object-contain"
+                />
+              </div>
+              <p className="mt-4 text-lg font-semibold text-[var(--brand-dark)]">Irvines Butchers</p>
+              <p className="mt-1 text-sm text-slate-600">Proud supporter of the society</p>
             </a>
           </div>
         </div>
