@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import AboutImageCarousel from "@/components/about/AboutImageCarousel";
 import { prisma } from "@/lib/prisma";
 
@@ -77,6 +78,61 @@ export default async function AboutPage() {
             if they prefer to skip the meal, and every outing brings prizes to
             play for, including the ever-present numpty prize for last place.
           </p>
+        </div>
+      </section>
+
+      <section className="mx-auto mt-6 max-w-6xl px-4 sm:mt-8 sm:px-6">
+        <div className="rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--brand)]">
+            Sponsors
+          </p>
+          <h2 className="mt-3 text-2xl font-semibold text-[var(--brand-dark)] sm:text-3xl">
+            Backing the society this season
+          </h2>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-700 sm:text-base">
+            We are grateful to the local businesses supporting Imperial Golf Society
+            and helping the season run smoothly.
+          </p>
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            <a
+              href="https://www.imperialgolfsociety.co.uk"
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface-strong)] p-5 transition hover:bg-white"
+            >
+              <div className="flex min-h-40 items-center justify-center rounded-[1.25rem] bg-white p-4">
+                <Image
+                  src="/imperial_Sponsor.png"
+                  alt="Imperial Bar sponsor sign"
+                  width={640}
+                  height={360}
+                  className="h-auto max-h-28 w-auto object-contain"
+                />
+              </div>
+              <p className="mt-4 text-lg font-semibold text-[var(--brand-dark)]">Imperial Bar</p>
+              <p className="mt-1 text-sm text-slate-600">Home of the society in Bangor</p>
+            </a>
+
+            <a
+              href="https://www.dmsuppliesni.co.uk"
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface-strong)] p-5 transition hover:bg-white"
+            >
+              <div className="flex min-h-40 items-center justify-center rounded-[1.25rem] bg-white p-4">
+                <Image
+                  src="/dmsuppliesni_sponsor.png"
+                  alt="DM Supplies NI sponsor logo"
+                  width={640}
+                  height={360}
+                  className="h-auto max-h-28 w-auto object-contain"
+                />
+              </div>
+              <p className="mt-4 text-lg font-semibold text-[var(--brand-dark)]">DM Supplies NI</p>
+              <p className="mt-1 text-sm text-slate-600">www.dmsuppliesni.co.uk</p>
+            </a>
+          </div>
         </div>
       </section>
 
