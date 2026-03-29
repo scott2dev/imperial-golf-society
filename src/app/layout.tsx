@@ -21,6 +21,11 @@ export const metadata: Metadata = {
   },
   description:
     "The home of Imperial Golf Society for fixtures, results, society news, and member updates throughout the season.",
+  icons: {
+    icon: "/bangoremblem.png",
+    shortcut: "/bangoremblem.png",
+    apple: "/bangoremblem.png",
+  },
 };
 
 export default function RootLayout({

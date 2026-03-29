@@ -130,7 +130,7 @@ export default async function AboutPage() {
                 />
               </div>
               <p className="mt-4 text-lg font-semibold text-[var(--brand-dark)]">DM Supplies NI</p>
-              <p className="mt-1 text-sm text-slate-600">www.dmsuppliesni.co.uk</p>
+              <p className="mt-1 text-sm text-slate-600">Proud supporter of the society</p>
             </a>
 
             <a
@@ -170,9 +170,7 @@ export default async function AboutPage() {
               <p className="mt-4 text-lg font-semibold text-[var(--brand-dark)]">
                 West Gourmet Sandwich Bar
               </p>
-              <p className="mt-1 text-sm text-slate-600">
-                www.westgourmetsandwichbar.com
-              </p>
+              <p className="mt-1 text-sm text-slate-600">Proud supporter of the society</p>
             </a>
           </div>
         </div>
