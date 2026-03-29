@@ -4,14 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Cormorant_Garamond, Libre_Baskerville } from "next/font/google";
+import { Great_Vibes, Libre_Baskerville } from "next/font/google";
 import { signOut, useSession } from "next-auth/react";
 import { navItems, siteName } from "@/lib/site-data";
 
-const titleFont = Cormorant_Garamond({
+const titleFont = Great_Vibes({
   subsets: ["latin"],
-  weight: ["600"],
-  style: ["italic"],
+  weight: ["400"],
 });
 
 const navFont = Libre_Baskerville({
@@ -58,7 +57,7 @@ export default function SiteHeader() {
               />
             </span>
             <span className="block truncate text-base font-semibold text-white sm:text-lg">
-              <span className={`${titleFont.className} text-lg italic tracking-[0.04em] sm:text-2xl`}>
+              <span className={`${titleFont.className} text-2xl tracking-[0.02em] sm:text-[2.25rem]`}>
                 {siteName}
               </span>
             </span>
