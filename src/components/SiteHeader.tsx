@@ -58,7 +58,7 @@ export default function SiteHeader() {
               />
             </span>
             <span className="block truncate text-base font-semibold text-white sm:text-lg">
-              <span className={`${titleFont.className} text-lg italic tracking-[0.04em] sm:text-2xl`}>
+              <span className={`${titleFont.className} text-xl italic tracking-[0.04em] sm:text-[1.7rem]`}>
                 {siteName}
               </span>
             </span>
