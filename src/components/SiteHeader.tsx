@@ -4,11 +4,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Libre_Baskerville, Playfair_Display } from "next/font/google";
+import { Cormorant_Garamond, Libre_Baskerville } from "next/font/google";
 import { signOut, useSession } from "next-auth/react";
 import { navItems, siteName } from "@/lib/site-data";
 
-const titleFont = Playfair_Display({
+const titleFont = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["600"],
   style: ["italic"],
@@ -58,7 +58,7 @@ export default function SiteHeader() {
               />
             </span>
             <span className="block truncate text-base font-semibold text-white sm:text-lg">
-              <span className={`${titleFont.className} text-xl tracking-[0.02em] sm:text-[1.7rem]`}>
+              <span className={`${titleFont.className} text-lg italic tracking-[0.04em] sm:text-2xl`}>
                 {siteName}
               </span>
             </span>
