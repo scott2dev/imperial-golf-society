@@ -37,8 +37,8 @@ export default function SiteHeader() {
           <Link href="/" className="flex min-w-0 items-center gap-3">
             <span className="relative -my-3 -ml-1 block h-14 w-14 shrink-0 overflow-visible">
               <Image
-                src="/golf-logo.png"
-                alt="Imperial Golf Society logo"
+                src="/bangoremblem.png"
+                alt="Bangor emblem"
                 width={96}
                 height={96}
                 className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 object-contain"
@@ -150,17 +150,7 @@ export default function SiteHeader() {
                       aria-hidden="true"
                       className={active ? "text-[#173021]" : "!text-white"}
                     >
-                      {active ? (
-                        <Image
-                          src="/golf-flag.png"
-                          alt=""
-                          width={54}
-                          height={54}
-                          className="h-[54px] w-[54px] object-contain"
-                        />
-                      ) : (
-                        "+"
-                      )}
+                      {active ? null : "+"}
                     </span>
                   </Link>
                 </li>
