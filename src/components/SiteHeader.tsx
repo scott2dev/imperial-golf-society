@@ -153,9 +153,9 @@ export default function SiteHeader() {
                   <Link
                     href={item.href}
                     onClick={() => setIsOpen(false)}
-                  className={`flex items-center justify-between rounded-2xl px-4 text-base font-medium transition ${
+                    className={`flex items-center justify-between rounded-2xl px-4 text-base font-medium transition ${
                       active
-                        ? "bg-[#f3e1ae] py-1.5 text-[#173021] shadow-sm ring-1 ring-white/55"
+                        ? "bg-[#f3e1ae] py-3 text-[#173021] shadow-sm ring-1 ring-white/55"
                         : "bg-white/10 py-3 !text-white hover:bg-white/16 !hover:text-white"
                     }`}
                   >
@@ -166,7 +166,7 @@ export default function SiteHeader() {
                     </span>
                     <span
                       aria-hidden="true"
-                      className={active ? "text-[#173021]" : "!text-white"}
+                      className={`inline-flex h-6 w-6 items-center justify-center ${active ? "text-[#173021]" : "!text-white"}`}
                     >
                       {active ? null : "+"}
                     </span>
