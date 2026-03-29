@@ -4,13 +4,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Great_Vibes, Libre_Baskerville } from "next/font/google";
+import { Libre_Baskerville, Playfair_Display } from "next/font/google";
 import { signOut, useSession } from "next-auth/react";
 import { navItems, siteName } from "@/lib/site-data";
 
-const titleFont = Great_Vibes({
+const titleFont = Playfair_Display({
   subsets: ["latin"],
-  weight: ["400"],
+  weight: ["600"],
+  style: ["italic"],
 });
 
 const navFont = Libre_Baskerville({
@@ -57,7 +58,7 @@ export default function SiteHeader() {
               />
             </span>
             <span className="block truncate text-base font-semibold text-white sm:text-lg">
-              <span className={`${titleFont.className} text-2xl tracking-[0.02em] sm:text-[2.25rem]`}>
+              <span className={`${titleFont.className} text-xl tracking-[0.02em] sm:text-[1.7rem]`}>
                 {siteName}
               </span>
             </span>
