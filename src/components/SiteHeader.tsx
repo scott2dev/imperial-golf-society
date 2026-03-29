@@ -4,8 +4,20 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { Cormorant_Garamond, Libre_Baskerville } from "next/font/google";
 import { signOut, useSession } from "next-auth/react";
 import { navItems, siteName } from "@/lib/site-data";
+
+const titleFont = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["600"],
+  style: ["italic"],
+});
+
+const navFont = Libre_Baskerville({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
 
 function isActive(pathname: string, href: string) {
   const normalizedHref = href.split("#")[0] || "/";
@@ -46,7 +58,9 @@ export default function SiteHeader() {
               />
             </span>
             <span className="block truncate text-base font-semibold text-white sm:text-lg">
-              {siteName}
+              <span className={`${titleFont.className} text-lg italic tracking-[0.04em] sm:text-2xl`}>
+                {siteName}
+              </span>
             </span>
           </Link>
 
@@ -93,7 +107,9 @@ export default function SiteHeader() {
                           : "!text-white hover:bg-white/12 !hover:text-white"
                       }`}
                     >
-                      <span className={active ? "text-[#173021]" : "!text-white"}>
+                      <span
+                        className={`${navFont.className} ${active ? "text-[#173021]" : "!text-white"} tracking-[0.03em]`}
+                      >
                         {item.label}
                       </span>
                     </Link>
@@ -137,13 +153,15 @@ export default function SiteHeader() {
                   <Link
                     href={item.href}
                     onClick={() => setIsOpen(false)}
-                    className={`flex items-center justify-between rounded-2xl px-4 text-base font-medium transition ${
+                  className={`flex items-center justify-between rounded-2xl px-4 text-base font-medium transition ${
                       active
                         ? "bg-[#f3e1ae] py-1.5 text-[#173021] shadow-sm ring-1 ring-white/55"
                         : "bg-white/10 py-3 !text-white hover:bg-white/16 !hover:text-white"
                     }`}
                   >
-                    <span className={active ? "text-[#173021]" : "!text-white"}>
+                    <span
+                      className={`${navFont.className} ${active ? "text-[#173021]" : "!text-white"} tracking-[0.03em]`}
+                    >
                       {item.label}
                     </span>
                     <span
