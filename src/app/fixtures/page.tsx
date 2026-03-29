@@ -17,16 +17,31 @@ const previousSponsors = [
     logoSrc: "/imperial_Sponsor.png",
     logoAlt: "Imperial Bar sponsor logo",
     contribution: "Official sponsor and affiliated bar of Imperial Golf Society",
-    sponsorUrl:
-      "https://www.google.com/search?q=Imperial+Bar+Bangor+Northern+Ireland",
+    sponsorUrl: "https://www.imperialgolfsociety.co.uk",
+  },
+  {
+    id: "dm-supplies-ni",
+    name: "DM Supplies NI",
+    logoSrc: "/dmsuppliesni_sponsor.png",
+    logoAlt: "DM Supplies NI sponsor logo",
+    contribution: "Proud supporter of the society",
+    sponsorUrl: "https://www.dmsuppliesni.co.uk",
   },
   {
     id: "irvines-butchers",
-    name: "Irvine's Butchers",
+    name: "Irvines Butchers",
     logoSrc: "/irvinesbutchers_sponsor.png",
-    logoAlt: "Irvine's Butchers sponsor logo",
-    contribution: "Supporter of society outing prizes",
+    logoAlt: "Irvines Butchers sponsor logo",
+    contribution: "Proud supporter of the society",
     sponsorUrl: "https://irvinesbutchery.co.uk/",
+  },
+  {
+    id: "west-gourmet-sandwich-bar",
+    name: "West Gourmet Sandwich Bar",
+    logoSrc: "/westgourmetsandwichbar_sponsor.png",
+    logoAlt: "West Gourmet Sandwich Bar sponsor logo",
+    contribution: "Proud supporter of the society",
+    sponsorUrl: "https://www.westgourmetsandwichbar.com/",
   },
 ];
 
