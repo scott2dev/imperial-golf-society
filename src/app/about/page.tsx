@@ -151,6 +151,29 @@ export default async function AboutPage() {
               <p className="mt-4 text-lg font-semibold text-[var(--brand-dark)]">Irvines Butchers</p>
               <p className="mt-1 text-sm text-slate-600">Proud supporter of the society</p>
             </a>
+
+            <a
+              href="https://www.westgourmetsandwichbar.com/"
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface-strong)] p-5 transition hover:bg-white sm:col-span-2"
+            >
+              <div className="flex min-h-40 items-center justify-center rounded-[1.25rem] p-4">
+                <Image
+                  src="/westgourmetsandwichbar_sponsor.png"
+                  alt="West Gourmet Sandwich Bar sponsor logo"
+                  width={640}
+                  height={360}
+                  className="h-auto max-h-28 w-auto object-contain"
+                />
+              </div>
+              <p className="mt-4 text-lg font-semibold text-[var(--brand-dark)]">
+                West Gourmet Sandwich Bar
+              </p>
+              <p className="mt-1 text-sm text-slate-600">
+                www.westgourmetsandwichbar.com
+              </p>
+            </a>
           </div>
         </div>
       </section>
